@@ -1,0 +1,20 @@
+# ESXi variables default value
+vsphere_server: "{{ lookup('env', 'VSPHERE_SERVER') }}"
+vsphere_username: "{{ lookup('env', 'VSPHERE_USERNAME') }}"
+vsphere_password: "{{ lookup('env', 'VSPHERE_PASSWORD') }}"
+esxi_host: "{{ lookup('env', 'ESXI_HOST') }}"
+esxi_datacenter: "{{lookup('env', 'ESXI_DATACENTER') }}"
+esxi_datastore: "datastore-39"
+# or efi
+esxi_firmware: "bios"
+# centos8_64Guest or fedora64Guest
+esxi_guest_id: "rhel8_64Guest"
+esxi_guest_username: "rhel"
+esxi_guest_password: "redhat"
+esxi_cpu: 2
+esxi_memory_mb: 4096
+esxi_disk_gb: 20
+esxi_network: "VM Network"
+esxi_nic_type: "vmxnet3"
+esxi_template: "CKI-TEMPLATE-RHEL-8-BIOS"
+esxi_snapshot_name: "ICABase"

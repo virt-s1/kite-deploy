@@ -1,0 +1,2 @@
+# ESXi variables
+esxi_guest_name: "{{ project }}-{{ nvr }}-{{ esxi_firmware }}"

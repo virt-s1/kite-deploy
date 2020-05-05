@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: kernel
+      vars:
+        project: cki
+    - include_role:
+        name: guest
+      vars:
+        cloud: esxi
