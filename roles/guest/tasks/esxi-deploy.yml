@@ -1,0 +1,125 @@
+---
+- name: "clone vm from template {{ esxi_template }} on {{ esxi_host }}"
+  vmware_guest:
+    hostname: "{{ vsphere_server }}"
+    username: "{{ vsphere_username }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: no
+    datacenter: "{{ esxi_datacenter }}"
+    name: "{{ esxi_guest_name }}"
+    folder: ""
+    state: poweredon
+    template: "{{ esxi_template }}"
+    disk:
+    - size_gb: "{{ esxi_disk_gb }}"
+      type: thin
+      datastore: "{{ esxi_datastore }}"
+    hardware:
+      num_cpus: "{{ esxi_cpu }}"
+      hotadd_cpu: True
+      hotremove_cpu: True
+      memory_mb: "{{ esxi_memory_mb }}"
+      hotadd_memory: True
+      scsi: paravirtual
+      boot_firmware: "{{ esxi_firmware }}"
+    networks:
+    - name: "{{ esxi_network }}"
+      device_type: "{{ esxi_nic_type }}"
+      start_connected: true
+      type: dhcp
+    wait_for_ip_address: yes
+  register: new_guest
+
+- name: show new created guest info
+  debug:
+    var: new_guest
+
+- name: get uuid and make it a variable
+  set_fact:
+    hw_uuid: "{{ new_guest.instance.hw_product_uuid }}"
+
+- name: in case no ip address assigned or stuck at mount
+  block:
+    # The 'vmware_guest_facts' module has been renamed to 'vmware_guest_info'
+    # This feature will be removed in version 2.13
+    - name: wait for ip _really_ being available
+      vmware_guest_info:
+        hostname: "{{ vsphere_server }}"
+        username: "{{ vsphere_username }}"
+        password: "{{ vsphere_password }}"
+        validate_certs: no
+        datacenter: "{{ esxi_datacenter }}"
+        uuid: "{{ hw_uuid }}"
+      register: facts
+      until: facts.instance.ipv4 is not none
+      retries: 30
+      delay: 1
+  rescue:
+    - name: poweroff guest
+      vmware_guest:
+        hostname: "{{ vsphere_server }}"
+        username: "{{ vsphere_username }}"
+        password: "{{ vsphere_password }}"
+        validate_certs: no
+        uuid: "{{ hw_uuid }}"
+        state: poweredoff
+        state_change_timeout: 120
+    - name: start guest
+      vmware_guest:
+        hostname: "{{ vsphere_server }}"
+        username: "{{ vsphere_username }}"
+        password: "{{ vsphere_password }}"
+        validate_certs: no
+        uuid: "{{ hw_uuid }}"
+        state: poweredon
+        state_change_timeout: 120
+    - name: wait for ip _really_ being available
+      vmware_guest_info:
+        hostname: "{{ vsphere_server }}"
+        username: "{{ vsphere_username }}"
+        password: "{{ vsphere_password }}"
+        validate_certs: no
+        datacenter: "{{ esxi_datacenter }}"
+        uuid: "{{ hw_uuid }}"
+      register: facts
+      until: facts.instance.ipv4 is not none
+      retries: 30
+      delay: 1
+
+- name: guest smoking test
+  vmware_vm_shell:
+    hostname: "{{ vsphere_server }}"
+    username: "{{ vsphere_username }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: no
+    vm_id: "{{ hw_uuid }}"
+    vm_id_type: uuid
+    vm_username: "{{ esxi_guest_username }}"
+    vm_password: "{{ esxi_guest_password }}"
+    vm_shell: /usr/bin/cat
+    vm_shell_args: /etc/redhat-release
+    wait_for_process: yes
+  register: shell_command_output
+  failed_when: shell_command_output.exit_code != 0
+
+- name: show command result
+  debug:
+    var: shell_command_output
+
+- name: create a snapshot
+  vmware_guest_snapshot:
+    hostname: "{{ vsphere_server }}"
+    username: "{{ vsphere_username }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: no
+    datacenter: "{{ esxi_datacenter }}"
+    uuid: "{{ hw_uuid }}"
+    state: present
+    snapshot_name: "{{ esxi_snapshot_name }}"
+    description: "snapshot for running {{ project }} test"
+
+- name: add guest ip into host group esxi_guest_group
+  add_host:
+    name: "{{ facts.instance.ipv4 }}"
+    groups: guest
+    kernel_nvr: "{{ kernel_nvr }}"

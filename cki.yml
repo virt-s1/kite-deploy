@@ -1,14 +1,23 @@
 ---
-- hosts: localhost
+- hosts: "{{ cloud_platform }}"
   gather_facts: no
   become: no
+  vars:
+    project: cki
 
   tasks:
     - include_role:
         name: kernel
       vars:
-        project: cki
+        action: download
     - include_role:
         name: guest
       vars:
-        cloud: esxi
+        action: deploy
+
+- hosts: guest
+  tasks:
+    - include_role:
+        name: kernel
+      vars:
+        action: install
