@@ -1,0 +1,32 @@
+---
+- name: copy kernel to guest
+  copy:
+    src: "{{ playbook_dir }}/kernel"
+    dest: "/home/admin"
+
+- name: install kernel on guest
+  dnf:
+    name: "/home/admin/kernel/kernel-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-core-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-modules-{{ kernel_nvr }}.rpm"
+    state: present
+    allow_downgrade: yes
+  become: yes
+
+- name: reboot guest for new kernel to make effect
+  reboot:
+    reboot_timeout: 300
+  become: yes
+
+- name: get current kernel version
+  shell: uname -r
+  register: kernel_version
+
+- name: show current kernel version
+  debug:
+    var: kernel_version.stdout
+
+- name: checking kernel version
+  assert:
+    that:
+      - kernel_version.stdout == kernel_nvr
+    fail_msg: "Upgrade kernel to {{ kernel_nvr }} failed"
+    success_msg: "Upgrade kernel to {{ kernel_version.stdout }}"
