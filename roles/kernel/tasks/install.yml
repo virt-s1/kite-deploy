@@ -6,7 +6,7 @@
 
 - name: install kernel on guest
   dnf:
-    name: "/home/admin/kernel/kernel-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-core-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-modules-{{ kernel_nvr }}.rpm"
+    name: "/home/admin/kernel/kernel-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-core-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-modules-{{ kernel_nvr }}.rpm, /home/admin/kernel/kernel-modules-extra-{{ kernel_nvr }}.rpm"
     state: present
     allow_downgrade: yes
   become: yes

@@ -1,3 +1,5 @@
 *.zip
 /kernel
 tmp/
+/output
+/results

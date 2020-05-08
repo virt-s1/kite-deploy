@@ -10,6 +10,7 @@
         name: kernel
       vars:
         action: download
+
     - include_role:
         name: guest
       vars:
@@ -21,3 +22,20 @@
         name: kernel
       vars:
         action: install
+
+    - include_role:
+        name: test
+      vars:
+        run: ltp
+
+- hosts: "{{ cloud_platform }}"
+  gather_facts: no
+  become: no
+  vars:
+    project: cki
+
+  tasks:
+    - include_role:
+        name: guest
+      vars:
+        action: remove

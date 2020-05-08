@@ -1,0 +1,71 @@
+---
+- name: install ltp
+  dnf:
+    name: "https://github.com/liangxiao1/rpmbuild_specs/releases/download/ltp-master-20191128/ltp-master-20191128.x86_64.rpm"
+    state: present
+  become: yes
+  become_user: root
+
+- name: copy ltp skip case file to /opt/ltp
+  copy:
+    src: skip.ltp
+    dest: /opt/ltp
+  become: yes
+
+- name: clean results and output folders
+  file:
+    path: "/opt/ltp/{{ item }}"
+    state: absent
+  loop:
+    - results
+    - output
+  become: yes
+
+- name: run ltp test
+  command: "./runltp -p -q -f {{ item }} -o {{ item }}.console -l {{ item }}.result -S skip.ltp"
+  become: yes
+  become_user: root
+  args:
+    chdir: /opt/ltp/
+  loop:
+    - commands
+    - connectors
+    - cpuhotplug
+    - crypto
+    - dio
+    - fcntl-locktests
+    - fs
+    - fs_bind
+    - fs_perms_simple
+    - fsx
+    - hugetlb
+    - hyperthreading
+    - input
+    - ipc
+    - math
+    - mm
+    - nptl
+    - power_management_tests
+    - sched
+    - syscalls
+    - tracing
+    - uevent
+    - net.tcp_cmds
+    - net.ipv6
+    - net_stress.interface
+  ignore_errors: True
+
+- name: fetch log and result folder back
+  synchronize:
+    mode: pull
+    src: "/opt/ltp/{{ item }}"
+    dest: "{{ playbook_dir }}"
+  loop:
+    - results
+    - output
+
+- name: check result
+  local_action: command grep -qrw 'FAIL' {{ playbook_dir }}/results
+  register: grep_result
+  failed_when: grep_result.rc == 0
+  ignore_errors: True
