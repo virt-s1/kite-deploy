@@ -11,7 +11,7 @@ esxi_firmware: "bios"
 esxi_guest_id: "rhel8_64Guest"
 esxi_guest_username: "rhel"
 esxi_guest_password: "redhat"
-esxi_cpu: 2
+esxi_cpu: 4
 esxi_memory_mb: 4096
 esxi_disk_gb: 20
 esxi_network: "VM Network"
