@@ -16,5 +16,5 @@ esxi_memory_mb: 4096
 esxi_disk_gb: 20
 esxi_network: "VM Network"
 esxi_nic_type: "vmxnet3"
-esxi_template: "TEMPLATE-RHEL-8-BIOS"
+esxi_template: "template-rhel-8-bios"
 esxi_snapshot_name: "ICABase"
