@@ -15,7 +15,6 @@
   debug:
     var: cki_url
 
-comment the following tasks for debugging
 - name: download cki kernel artifacts
   get_url:
     url: "{{ cki_url }}"
@@ -34,13 +33,13 @@ comment the following tasks for debugging
 
 - name: "copy kernel, core, and modules into {{ playbook_dir }}"
   copy:
-    src: "{{ playbook_dir }}/tmp/artifacts/repo/{{ cki_nvr }}/{{ item }}"
+    src: "{{ playbook_dir }}/tmp/artifacts/repo/{{ kernel_nvr }}/{{ item }}"
     dest: "{{ playbook_dir }}/kernel/"
   with_items:
-    - "kernel-{{ cki_nvr }}.rpm"
-    - "kernel-core-{{ cki_nvr }}.rpm"
-    - "kernel-modules-{{ cki_nvr }}.rpm"
-    - "kernel-modules-extra-{{ cki_nvr }}.rpm"
+    - "kernel-{{ kernel_nvr }}.rpm"
+    - "kernel-core-{{ kernel_nvr }}.rpm"
+    - "kernel-modules-{{ kernel_nvr }}.rpm"
+    - "kernel-modules-extra-{{ kernel_nvr }}.rpm"
 
 - name: delete tmp folder
   file:
