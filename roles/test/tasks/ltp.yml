@@ -69,3 +69,9 @@
   register: grep_result
   failed_when: grep_result.rc == 0
   ignore_errors: True
+
+- name: write result to ltp.result file
+  copy:
+    content: "{{ 'FAILURE' if grep_result.rc == 0 else 'SUCCESS' }}"
+    dest: ltp.result
+  delegate_to: localhost
