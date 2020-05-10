@@ -29,30 +29,30 @@
     chdir: /opt/ltp/
   loop:
     - commands
-    - connectors
-    - cpuhotplug
-    - crypto
-    - dio
-    - fcntl-locktests
-    - fs
-    - fs_bind
-    - fs_perms_simple
-    - fsx
-    - hugetlb
-    - hyperthreading
-    - input
-    - ipc
-    - math
-    - mm
-    - nptl
-    - power_management_tests
-    - sched
-    - syscalls
-    - tracing
-    - uevent
-    - net.tcp_cmds
-    - net.ipv6
-    - net_stress.interface
+    # - connectors
+    # - cpuhotplug
+    # - crypto
+    # - dio
+    # - fcntl-locktests
+    # - fs
+    # - fs_bind
+    # - fs_perms_simple
+    # - fsx
+    # - hugetlb
+    # - hyperthreading
+    # - input
+    # - ipc
+    # - math
+    # - mm
+    # - nptl
+    # - power_management_tests
+    # - sched
+    # - syscalls
+    # - tracing
+    # - uevent
+    # - net.tcp_cmds
+    # - net.ipv6
+    # - net_stress.interface
   ignore_errors: True
 
 - name: fetch log and result folder back
