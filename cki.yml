@@ -16,6 +16,11 @@
       vars:
         action: deploy
 
+    - name: keep private key permission to 600
+      file:
+        path: "key/identity"
+        mode: "0600"
+
 - hosts: guest
   tasks:
     - include_role:
