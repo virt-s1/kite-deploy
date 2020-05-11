@@ -48,7 +48,6 @@
     - power_management_tests
     - sched
     - syscalls
-    - tracing
     - uevent
     - net.tcp_cmds
     - net.ipv6
