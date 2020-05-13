@@ -5,6 +5,9 @@
     state: present
   become: yes
   become_user: root
+  register: install_result
+  retries: 10
+  until: install_result is success
 
 - name: copy ltp skip case file to /opt/ltp
   copy:
