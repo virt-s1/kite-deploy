@@ -55,7 +55,12 @@
     - net.tcp_cmds
     - net.ipv6
     - net_stress.interface
+  register: ltp_results
   ignore_errors: True
+
+- name: show ltp_results
+  debug:
+    var: ltp_results
 
 - name: fetch log and result folder back
   synchronize:
