@@ -4,3 +4,6 @@ tmp/
 /output
 /results
 *.result
+*.report
+*.crt
+*.key

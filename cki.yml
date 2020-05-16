@@ -40,6 +40,24 @@
     project: cki
 
   tasks:
+    - name: get host info
+      vmware_host_facts:
+        hostname: "{{ vsphere_server }}"
+        username: "{{ vsphere_username }}"
+        password: "{{ vsphere_password }}"
+        validate_certs: no
+        esxi_hostname: "{{ esxi_host }}"
+      register: host_facts
+
+    - name: show host_facts
+      debug:
+        var: host_facts
+
+    - include_role:
+        name: umb
+      vars:
+        action: send
+
     - include_role:
         name: guest
       vars:

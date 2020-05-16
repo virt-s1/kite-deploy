@@ -1,0 +1,10 @@
+# umb default
+# https://mojo.redhat.com/docs/DOC-1182793
+broker_ip: "10.25.103.161"
+stomp_port: 61612
+ssl_cert_file: umb-sending-crt.crt
+ssl_key_file: umb-sending-key.key
+
+# for cki
+pipeline_id: "{{ lookup('env', 'PIPELINE_ID') }}"
+log_url: "{{ lookup('env', 'BUILD_URL') }}console"

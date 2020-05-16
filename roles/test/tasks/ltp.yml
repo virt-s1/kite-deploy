@@ -62,6 +62,17 @@
   debug:
     var: ltp_results
 
+- name: set passed result
+  set_fact:
+    ltp_result: "PASS"
+
+- name: set failed result
+  set_fact:
+    ltp_result: "FAIL"
+  when:
+    - ltp_results.failed is defined
+    - ltp_results.failed == "failed"
+
 - name: fetch log and result folder back
   synchronize:
     mode: pull
@@ -71,14 +82,14 @@
     - results
     - output
 
-- name: check result
-  local_action: command grep -qrw 'FAIL' {{ playbook_dir }}/results
-  register: grep_result
-  failed_when: grep_result.rc == 0
-  ignore_errors: True
+- name: write ltp report
+  template:
+    src: ltp_report.j2
+    dest: ltp.report
+  delegate_to: localhost
 
 - name: write result to ltp.result file
   copy:
-    content: "{{ 'FAILURE' if grep_result.rc == 0 else 'SUCCESS' }}"
+    content: "{{ ltp_result }}"
     dest: ltp.result
   delegate_to: localhost
