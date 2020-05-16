@@ -15,4 +15,4 @@
     - sending-key
 
 - name: send result back
-  command: "{{ role_path }}/files/cki-send.py --broker={{ broker_ip }} --port={{ stomp_port }} --ssl_cert_file={{ ssl_cert_file }} --ssl_key_file={{ ssl_key_file }} --pipeline_id={{ pipeline_id }} --arch=x86_64 --log_url={{ log_url }} --result={{ test_result }} --cloud={{ project }}"
+  command: "{{ role_path }}/files/cki-send.py --broker={{ broker_ip }} --port={{ stomp_port }} --ssl_cert_file={{ ssl_cert_file }} --ssl_key_file={{ ssl_key_file }} --pipeline_id={{ pipeline_id }} --arch=x86_64 --log_url={{ log_url }} --result={{ test_result }} --cloud={{ cloud_info }}"

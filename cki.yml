@@ -49,9 +49,9 @@
         esxi_hostname: "{{ esxi_host }}"
       register: host_facts
 
-    - name: show host_facts
-      debug:
-        var: host_facts
+    - name: set cloud info varaible
+      set_fact:
+        cloud_info: "{{ host_facts.ansible_facts.ansible_distribution }}-{{ host_facts.ansible_facts.ansible_distribution_version }}"
 
     - include_role:
         name: umb

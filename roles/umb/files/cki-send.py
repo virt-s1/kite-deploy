@@ -20,13 +20,13 @@ def main(args):
         "team_name": "Virt-QE-S1",
         "results": [
             {
+                "test_name": "LTP_Lite",
+                "test_description": "Cloud platform - {}".format(args.cloud),
                 "test_arch": args.arch,
-                "test_description": "Kernel test on {}".format(args.cloud),
+                "test_result": args.result,
                 "test_log_url": [
                     args.log_url
                 ],
-                "test_name": "LTP_Lite",
-                "test_result": args.result,
                 "test_waived": "True"
             }
         ]
