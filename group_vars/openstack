@@ -1,0 +1,6 @@
+images:
+  rhel_8_3: RHEL-8.3.0-x86_64-nightly-latest
+  fedora_32: Fedora-Cloud-Base-32
+flavor: m1.medium
+network: provider_net_cci_5
+

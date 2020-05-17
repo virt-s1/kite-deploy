@@ -1,0 +1,35 @@
+---
+- name: install osbuild-composer and composer-cli
+  dnf:
+    name:
+      - osbuild-composer
+      - composer-cli
+    state: latest
+  become: yes
+
+- name: copy lctp.toml
+  copy:
+    src: lctp.toml
+    dest: /home/cloud-user/lctp.toml
+
+- name: start osbuild-composer.socket
+  systemd:
+    name: osbuild-composer.socket
+    state: started
+  become: yes
+
+- name: push lctp.toml as blueprint
+  command: composer-cli blueprints push /home/cloud-user/lctp.toml
+
+- name: show blueprint
+  command: composer-cli blueprints list
+
+- name: start image building
+  command: "composer-cli compse start lctp {{ image_type[platform] }}"
+
+- name: get compose uuid
+  command: composer-cli compose status | awk '{print $1}'
+  register: compose_uuid
+
+- debug:
+    var: compose_uuid

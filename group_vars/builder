@@ -1,0 +1,4 @@
+image_type:
+  esxi: vmdk
+  aws: ami
+  azure: vhd

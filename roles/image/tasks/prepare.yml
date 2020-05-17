@@ -1,0 +1,84 @@
+---
+- name: random number as part of instance name
+  set_fact:
+    random_number: "{{ 99 | random(start=11) }}"
+
+- name: create openstack configuration folder
+  file:
+    path: ~/.config/openstack
+    state: directory
+
+- name: set vault password file
+  copy:
+    content: "{{ lookup('env', 'VSPHERE_PASSWORD') }}"
+    dest: "~/.config/ansible-vault"
+
+- name: save clouds.yaml to ~/.config/openstack
+  command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ role_path }}/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
+
+- name: create a new openstack keypair
+  os_keypair:
+    cloud: psi-openstack
+    state: present
+    name: lctp_os_key
+  register: lctp_os_keypair
+
+- name: save private key to file
+  copy:
+    content: "{{ lctp_os_keypair.key.private_key }}"
+    dest: "lctp_os_key.private"
+    mode: '0600'
+
+- name: create security group
+  os_security_group:
+    cloud: psi-openstack
+    name: lctp
+    state: present
+    description: security group for lctp image build server
+
+- name: set rule for security group lctp
+  os_security_group_rule:
+    cloud: psi-openstack
+    security_group: lctp
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: deploy instance
+  os_server:
+    cloud: psi-openstack
+    name: "lctp-image-builder-{{ os }}-{{ random_number }}"
+    image: "{{ images[os] }}"
+    flavor: "{{ flavor }}"
+    network: "{{ network }}"
+    key_name: lctp_os_key
+    security_groups: lctp
+    auto_ip: yes
+    wait: yes
+    timeout: 300
+    userdata: |
+      #!/bin/bash
+      cat << EOF >> /etc/yum.repos.d/rhel8.repo
+[RHEL-8-BaseOS]
+name=baseos
+baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/BaseOS/x86_64/os/
+enabled=1
+gpgcheck=0
+
+[RHEL-8-AppStream]
+name=appstream
+baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/AppStream/x86_64/os/
+enabled=1
+gpgcheck=0
+EOF
+      dnf -y install python3-dnf python3
+  register: instance_result
+
+- debug:
+    var: instance_result
+
+- name: add os instance ip into host group builder
+  add_host:
+    name: "{{ instance_result.openstack.public_v4 }}"
+    groups: builder

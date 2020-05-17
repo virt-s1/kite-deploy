@@ -1,0 +1,123 @@
+name = "lctp"
+description = "lctp cloud image"
+version = "0.0.3"
+modules = []
+groups = []
+
+[[packages]]
+name = "python3"
+version = "*"
+
+[[packages]]
+name = "libaio"
+version = "*"
+
+[[packages]]
+name = "libaio-devel"
+version = "*"
+
+[[packages]]
+name = "wget"
+version = "*"
+
+[[packages]]
+name = "bc"
+version = "*"
+
+[[packages]]
+name = "gcc-c++"
+version = "*"
+
+[[packages]]
+name = "gcc"
+version = "*"
+
+[[packages]]
+name = "rsync"
+version = "*"
+
+[[packages]]
+name = "git"
+version = "*"
+
+[[packages]]
+name = "net-tools"
+version = "*"
+
+[[packages]]
+name = "traceroute"
+version = "*"
+
+[[packages]]
+name = "xinetd"
+version = "*"
+
+[[packages]]
+name = "dnsmasq"
+version = "*"
+
+[[packages]]
+name = "dhcp-server"
+version = "*"
+
+[[packages]]
+name = "telnet"
+version = "*"
+
+[[packages]]
+name = "tcpdump"
+version = "*"
+
+[[packages]]
+name = "expect"
+version = "*"
+
+[[packages]]
+name = "bind-utils"
+version = "*"
+
+[[packages]]
+name = "numactl"
+version = "*"
+
+[[packages]]
+name = "numactl-devel"
+version = "*"
+
+[[packages]]
+name = "numactl-libs"
+version = "*"
+
+[[packages]]
+name = "gdb"
+version = "*"
+
+[[packages]]
+name = "dosfstools"
+version = "*"
+
+[[packages]]
+name = "sysstat"
+version = "*"
+
+[[packages]]
+name = "ksh"
+version = "*"
+
+[[packages]]
+name = "tcsh"
+version = "*"
+
+[[packages]]
+name = "openssh-server"
+version = "*"
+
+[customizations]
+hostname = "lctp"
+
+[[customizations.user]]
+name = "admin"
+description = "administrator"
+password = "$6$HJFRQwIdGCuLr8Gm$5dbeWRxtPK5QA.cbXG7HAkmWc37EQ/KljtUlQokc2DxsHgyE7RY5ySEvGlmDRpkC4HICNNwKwVj2oUavDv9m/0"
+key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC8/I14u/Dtp7nUAK90HdNeMCF1qclpvKJkwUd9Jc27C/IvGuPryLRumt6y3GIUAHXxFRQ2Cd+2fToEwxOm0NCVGO0cpXkLg6l9Fs+6Spjf1W3IrrMGiEtAMYA7DZwNRqFVcmDOZnOpyVRi6yBktHN4cx7mMsu0UY6jufhLGTtfU+iOpD5xnS8lvbRkCDzSDwaqx9/1v0t59YzbYnhdKEaeuMHIN3SwcjbyhRiLBdjfbG8ydVXgu+eiW8FTqOwZkdzNn4P8rg6ekS22S3l/q5j1kJidcy8haajc4pnCRfX3CXWKQIy1XCYHHnXgvnjLlKgLKfPX7U4U9c3M1ULP1h969C8pmr61koxkrzXi8Qc9VvHEP8P8q4cDOpMXaokGTChoT6fEM70ylD4WGnKipH8VnM13V+VVWeYtVjQtF1UJDyPEFpjQREhBDcKT2t50zXkUEhDno2lLm6DSf1q+r7823ItpEYiBRZYjpW9Do4PkvGooFxrO7tttmYkSrD2ByAk= linux-cloud-test"
+groups = ["wheel"]

@@ -1,0 +1,8 @@
+---
+- include_tasks: "{{ action }}.yml"
+  when:
+    - action == "build" or action == "prepare" or action == "clean"
+
+- include_tasks: "{{ action }}-{{ platform }}.yml"
+  when:
+    - action == "deploy"

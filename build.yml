@@ -1,0 +1,19 @@
+---
+- hosts: openstack
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: prepare
+        os: rhel_8_3
+
+- hosts: builder
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: build
+        platform: esxi
