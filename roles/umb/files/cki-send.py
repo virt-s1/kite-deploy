@@ -33,7 +33,9 @@ def main(args):
     }
     msg_json = json.dumps(msg)
     print(msg_json)
-    conn.send("/topic/VirtualTopic.eng.cki.results", body=msg_json)
+    conn.send("/topic/VirtualTopic.eng.cki.results",
+              body=msg_json,
+              headers={"topic": "VirtualTopic.eng.cki.results"})
 
 
 if __name__ == '__main__':
