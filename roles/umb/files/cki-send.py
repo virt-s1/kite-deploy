@@ -36,6 +36,7 @@ def main(args):
     conn.send("/topic/VirtualTopic.eng.cki.results",
               body=msg_json,
               headers={"topic": "VirtualTopic.eng.cki.results"})
+    conn.disconnect()
 
 
 if __name__ == '__main__':
