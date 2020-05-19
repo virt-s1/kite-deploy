@@ -1,6 +1,7 @@
 # umb default
 # https://mojo.redhat.com/docs/DOC-1182793
-broker_ip: "10.5.103.184"
+broker01_ip: "messaging-devops-broker01.web.prod.ext.phx2.redhat.com"
+broker02_ip: "messaging-devops-broker02.web.prod.ext.phx2.redhat.com"
 stomp_port: 61612
 ssl_cert_file: umb-sending-crt.crt
 ssl_key_file: umb-sending-key.key

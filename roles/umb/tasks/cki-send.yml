@@ -14,9 +14,11 @@
     - sending-crt
     - sending-key
 
-- name: send result back
-  command: "{{ role_path }}/files/cki-send.py --broker={{ broker_ip }} --port={{ stomp_port }} --ssl_cert_file={{ ssl_cert_file }} --ssl_key_file={{ ssl_key_file }} --pipeline_id={{ pipeline_id }} --arch=x86_64 --log_url={{ log_url }} --result={{ test_result }} --cloud=\"{{ cloud_info }}\""
-  register: send_result
-  retries: 10
-  delay: 3
-  until: send_result is success
+- name: send result from prod broker01
+  command: "{{ role_path }}/files/cki-send.py --broker={{ broker01_ip }} --port={{ stomp_port }} --ssl_cert_file={{ ssl_cert_file }} --ssl_key_file={{ ssl_key_file }} --pipeline_id={{ pipeline_id }} --arch=x86_64 --log_url={{ log_url }} --result={{ test_result }} --cloud=\"{{ cloud_info }}\""
+  register: send_from_broker01_result
+  ignore_errors: True
+
+- name: broker01 is unreachable send result from prod broker02
+  command: "{{ role_path }}/files/cki-send.py --broker={{ broker02_ip }} --port={{ stomp_port }} --ssl_cert_file={{ ssl_cert_file }} --ssl_key_file={{ ssl_key_file }} --pipeline_id={{ pipeline_id }} --arch=x86_64 --log_url={{ log_url }} --result={{ test_result }} --cloud=\"{{ cloud_info }}\""
+  when: send_from_broker01_result is failed
