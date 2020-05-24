@@ -1,0 +1,54 @@
+{% if os == "rhel-8-3" %}
+url --url {{ repos[os]["baseos"] }}
+{% endif %}
+text
+shutdown
+lang en_US.UTF-8
+keyboard us
+network --bootproto dhcp
+firewall --enabled --ssh
+selinux --enforcing
+rootpw --lock --iscrypted $6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
+user --name=admin --groups=wheel --iscrypted --password=$6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
+sshkey --username=admin "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC8/I14u/Dtp7nUAK90HdNeMCF1qclpvKJkwUd9Jc27C/IvGuPryLRumt6y3GIUAHXxFRQ2Cd+2fToEwxOm0NCVGO0cpXkLg6l9Fs+6Spjf1W3IrrMGiEtAMYA7DZwNRqFVcmDOZnOpyVRi6yBktHN4cx7mMsu0UY6jufhLGTtfU+iOpD5xnS8lvbRkCDzSDwaqx9/1v0t59YzbYnhdKEaeuMHIN3SwcjbyhRiLBdjfbG8ydVXgu+eiW8FTqOwZkdzNn4P8rg6ekS22S3l/q5j1kJidcy8haajc4pnCRfX3CXWKQIy1XCYHHnXgvnjLlKgLKfPX7U4U9c3M1ULP1h969C8pmr61koxkrzXi8Qc9VvHEP8P8q4cDOpMXaokGTChoT6fEM70ylD4WGnKipH8VnM13V+VVWeYtVjQtF1UJDyPEFpjQREhBDcKT2t50zXkUEhDno2lLm6DSf1q+r7823ItpEYiBRZYjpW9Do4PkvGooFxrO7tttmYkSrD2ByAk= linux-cloud-test"
+timezone --utc Asia/Shanghai
+bootloader --location=mbr --append="console=ttyS0,115200 rd_NO_PLYMOUTH net.ifnames=0 biosdevname=0 ro"
+zerombr
+clearpart --all --initlabel
+autopart
+
+%packages
+@core
+%end
+
+%post
+rm -f --verbose /etc/yum.repos.d/*.repo
+{% if os == "rhel-8-3" %}
+cat <<EOF > /etc/yum.repos.d/rhel8.repo
+[RHEL-8-BaseOS]
+name=rhel8-baseos
+baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8.3/compose/BaseOS/x86_64/os/
+enabled=1
+gpgcheck=0
+[RHEL-8-AppStream]
+name=rhel8-appstream
+baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8.3/compose/AppStream/x86_64/os/
+enabled=1
+gpgcheck=0
+EOF
+{% endif %}
+dnf install -y cloud-init python3 traceroute xinetd dnsmasq dhcp-server telnet tcpdump expect net-tools bind-utils numactl-devel libaio-devel libaio gdb dosfstools sysstat ksh tcsh gcc gcc-c++ git rsync wget curl bc psmisc quota
+{% if platform == "esxi" %}
+dnf install -y open-vm-tools
+sed -i 's/GRUB_TIMEOUT.*/GRUB_TIMEOUT=0/; /GRUB_CMDLINE_LINUX=/ s/"$/ ro net.ifnames=0"/' /etc/default/grub
+{% endif %}
+{% if platform == "azure" %}
+dnf install -y WALinuxAgent
+sed -i 's/GRUB_TIMEOUT.*/GRUB_TIMEOUT=0/; /GRUB_CMDLINE_LINUX=/ s/"$/ ro biosdevname=0 rootdelay=300 console=ttyS0 earlyprintk=ttyS0 net.ifnames=0"/' /etc/default/grub
+{% endif %}
+{% if platform == "aws" %}
+sed -i 's/GRUB_TIMEOUT.*/GRUB_TIMEOUT=0/; /GRUB_CMDLINE_LINUX=/ s/"$/ net.ifnames=0 biosdevname=0 ro console=ttyS0,115200n8 console=tty0 rd.blacklist=nouveau nvme_core.io_timeout=4294967295 crashkernel=auto"/' /etc/default/grub
+{% endif %}
+grub2-mkconfig -o /boot/grub2/grub.cfg
+systemctl is-enabled sshd.socket || systemctl is-enabled sshd.service || systemctl enable sshd.socket
+%end

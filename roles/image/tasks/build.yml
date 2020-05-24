@@ -1,35 +1,90 @@
 ---
-- name: install osbuild-composer and composer-cli
+- name: image building dependence
   dnf:
     name:
-      - osbuild-composer
-      - composer-cli
+      - curl
+      - nfs-utils
+      - expect
+      - sed
+      - tar
+      - qemu-kvm
+      - virt-install
+      - libvirt-daemon-kvm
     state: latest
   become: yes
 
-- name: copy lctp.toml
-  copy:
-    src: lctp.toml
-    dest: /home/cloud-user/lctp.toml
-
-- name: start osbuild-composer.socket
-  systemd:
-    name: osbuild-composer.socket
-    state: started
+- name: copy /etc/exports
+  template:
+    src: exports.j2
+    dest: /etc/exports
   become: yes
 
-- name: push lctp.toml as blueprint
-  command: composer-cli blueprints push /home/cloud-user/lctp.toml
+- name: start nfs service
+  systemd:
+    name: nfs-server
+    state: started
 
-- name: show blueprint
-  command: composer-cli blueprints list
+- name: generate kickstart file
+  template:
+    src: kickstart.j2
+    dest: "/home/cloud-user/{{ os }}.ks"
 
-- name: start image building
-  command: "composer-cli compse start lctp {{ image_type[platform] }}"
+- name: copy virt-install script
+  copy:
+    src: virt-install-image
+    dest: "/home/cloud-user/virt-install-image"
+    mode: '0764'
 
-- name: get compose uuid
-  command: composer-cli compose status | awk '{print $1}'
-  register: compose_uuid
+- name: build qcow2 image first
+  command: /home/cloud-user/virt-install-image /home/cloud-user/{{ os }}.qcow2 {{ os }}.ks {{ repos[os]["baseos"] }}
 
-- debug:
-    var: compose_uuid
+- name: "convert qcow2 to {{ image_type[platform] }}"
+  command: qemu-img convert -O {{ image_type[platform] }} /home/cloud-user/{{ os }}.qcow2 /home/cloud-user/{{ os }}.{{ image_type[platform] }}
+
+# comment out for now
+# - name: install osbuild-composer and composer-cli
+#   dnf:
+#     name:
+#       - osbuild-composer
+#       - composer-cli
+#     state: latest
+#   become: yes
+
+# - name: copy lctp.toml
+#   copy:
+#     src: lctp.toml
+#     dest: /home/cloud-user/lctp.toml
+
+# - name: create /etc/osbuild-composer/repositories
+#   file:
+#     path: /etc/osbuild-composer/repositories
+#     state: directory
+#   become: yes
+
+# - name: copy rhel_8_3 repo info
+#   copy:
+#     src: rhel-8.3.json
+#     dest: /etc/osbuild-composer/repositories
+#   become: yes
+
+# - name: start osbuild-composer.socket
+#   systemd:
+#     name: osbuild-composer.socket
+#     state: started
+#   become: yes
+
+# - name: push lctp.toml as blueprint
+#   command: composer-cli blueprints push /home/cloud-user/lctp.toml
+
+# - name: show blueprint
+#   command: composer-cli blueprints list
+
+# - name: start image building
+#   command: "composer-cli compse start lctp {{ image_type[platform] }}"
+
+# - name: get compose uuid
+#   command: composer-cli compose status | awk '{print $1}'
+#   register: compose_uuid
+
+# - debug:
+#     var: compose_uuid

@@ -36,13 +36,22 @@
     state: present
     description: security group for lctp image build server
 
-- name: set rule for security group lctp
+- name: set ssh rule for security group lctp
   os_security_group_rule:
     cloud: psi-openstack
     security_group: lctp
     protocol: tcp
     port_range_min: 22
     port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: set nfs rule for security group lctp
+  os_security_group_rule:
+    cloud: psi-openstack
+    security_group: lctp
+    protocol: tcp
+    port_range_min: 2049
+    port_range_max: 2049
     remote_ip_prefix: 0.0.0.0/0
 
 - name: deploy instance
@@ -60,23 +69,25 @@
     userdata: |
       #!/bin/bash
       cat << EOF >> /etc/yum.repos.d/rhel8.repo
-[RHEL-8-BaseOS]
-name=baseos
-baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/BaseOS/x86_64/os/
-enabled=1
-gpgcheck=0
+      [RHEL-8-BaseOS]
+      name=baseos
+      baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/BaseOS/x86_64/os/
+      enabled=1
+      gpgcheck=0
 
-[RHEL-8-AppStream]
-name=appstream
-baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/AppStream/x86_64/os/
-enabled=1
-gpgcheck=0
-EOF
+      [RHEL-8-AppStream]
+      name=appstream
+      baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/AppStream/x86_64/os/
+      enabled=1
+      gpgcheck=0
+      EOF
       dnf -y install python3-dnf python3
   register: instance_result
 
-- debug:
-    var: instance_result
+- name: waits until instance is reachable
+  wait_for_connection:
+    delay: 5
+    timeout: 120
 
 - name: add os instance ip into host group builder
   add_host:

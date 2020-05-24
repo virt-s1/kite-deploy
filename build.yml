@@ -8,12 +8,20 @@
         name: image
       vars:
         action: prepare
-        os: rhel_8_3
+        os: "{{ lookup('env', 'TEST_OS') }}"
+      when:
+        - image_format == "raw" or image_format == "vhd"
 
-- hosts: builder
+- hosts: esxi
+  gather_facts: no
+  become: no
+
   tasks:
     - include_role:
         name: image
       vars:
         action: build
         platform: esxi
+        os: "{{ lookup('env', 'TEST_OS') }}"
+      when:
+        - image_format == "vmdk"

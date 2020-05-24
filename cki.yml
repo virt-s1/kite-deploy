@@ -15,6 +15,7 @@
         name: guest
       vars:
         action: deploy
+        os: "{{ lookup('env', 'TEST_OS') }}"
 
     - name: keep private key permission to 600
       file:
@@ -62,3 +63,4 @@
         name: guest
       vars:
         action: remove
+        os: "{{ lookup('env', 'TEST_OS') }}"

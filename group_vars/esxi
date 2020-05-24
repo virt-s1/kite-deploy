@@ -7,14 +7,14 @@ esxi_datacenter: "{{lookup('env', 'ESXI_DATACENTER') }}"
 esxi_datastore: "datastore-39"
 # or efi
 esxi_firmware: "bios"
-# centos8_64Guest or fedora64Guest
-esxi_guest_id: "rhel8_64Guest"
-esxi_guest_username: "rhel"
-esxi_guest_password: "redhat"
+# centos8_64Guest fedora64Guest rhel8_64Guest
+esxi_guest_id: "{{ 'rhel8_64Guest' if 'rhel-8' in os else 'fedora64Guest' }}"
+esxi_guest_username: "admin"
+esxi_guest_password: "foobar"
 esxi_cpu: 4
 esxi_memory_mb: 4096
 esxi_disk_gb: 20
 esxi_network: "VM Network"
 esxi_nic_type: "vmxnet3"
-esxi_template: "template-rhel-8-bios"
+esxi_template: "template-{{ os }}-{{ esxi_firmware }}"
 esxi_snapshot_name: "ICABase"

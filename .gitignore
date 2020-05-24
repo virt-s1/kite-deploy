@@ -8,3 +8,5 @@ tmp/
 *.crt
 *.key
 *.private
+ks.cfg
+*.iso
