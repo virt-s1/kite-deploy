@@ -4,7 +4,7 @@ vsphere_username: "{{ lookup('env', 'VSPHERE_USERNAME') }}"
 vsphere_password: "{{ lookup('env', 'VSPHERE_PASSWORD') }}"
 esxi_host: "{{ lookup('env', 'ESXI_HOST') }}"
 esxi_datacenter: "{{lookup('env', 'ESXI_DATACENTER') }}"
-esxi_datastore: "datastore-39"
+esxi_datastore: "{{lookup('env', 'ESXI_DATASTORE') }}"
 # or efi
 esxi_firmware: "bios"
 # centos8_64Guest fedora64Guest rhel8_64Guest

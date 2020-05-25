@@ -45,20 +45,20 @@
     port_range_max: 22
     remote_ip_prefix: 0.0.0.0/0
 
-- name: set nfs rule for security group lctp
-  os_security_group_rule:
-    cloud: psi-openstack
-    security_group: lctp
-    protocol: tcp
-    port_range_min: 2049
-    port_range_max: 2049
-    remote_ip_prefix: 0.0.0.0/0
+# - name: set nfs rule for security group lctp
+#   os_security_group_rule:
+#     cloud: psi-openstack
+#     security_group: lctp
+#     protocol: tcp
+#     port_range_min: 2049
+#     port_range_max: 2049
+#     remote_ip_prefix: 0.0.0.0/0
 
 - name: deploy instance
   os_server:
     cloud: psi-openstack
     name: "lctp-image-builder-{{ os }}-{{ random_number }}"
-    image: "{{ images[os] }}"
+    image: "{{ images['fedora-32'] }}"
     flavor: "{{ flavor }}"
     network: "{{ network }}"
     key_name: lctp_os_key
@@ -68,19 +68,6 @@
     timeout: 300
     userdata: |
       #!/bin/bash
-      cat << EOF >> /etc/yum.repos.d/rhel8.repo
-      [RHEL-8-BaseOS]
-      name=baseos
-      baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/BaseOS/x86_64/os/
-      enabled=1
-      gpgcheck=0
-
-      [RHEL-8-AppStream]
-      name=appstream
-      baseurl=http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8/compose/AppStream/x86_64/os/
-      enabled=1
-      gpgcheck=0
-      EOF
       dnf -y install python3-dnf python3
   register: instance_result
 

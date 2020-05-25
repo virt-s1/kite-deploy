@@ -12,6 +12,17 @@
       when:
         - cloud_platform == "aws" or cloud_platform == "azure"
 
+- hosts: builder
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: create
+        os: "{{ lookup('env', 'TEST_OS') }}"
+      when:
+        - cloud_platform == "aws" or cloud_platform == "azure"
+
 - hosts: esxi
   gather_facts: no
   become: no

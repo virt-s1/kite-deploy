@@ -1,4 +1,3 @@
-# to make vsphere template
 repos:
   rhel-8-3:
     baseos: http://download.devel.redhat.com/rhel-8/nightly/RHEL-8/latest-RHEL-8.3/compose/BaseOS/x86_64/os/
@@ -11,3 +10,7 @@ boot_iso:
 checksum_sha256:
   rhel-8-3: 8d5b3b5dcd695605cd6ad83212aaee1726667c7d484df96f9681652e0a9ee47b
   fedora-rawhide: 12b7cb51b60162da43f4f8eb308a1a578789b142491229c2e26e8d8f380d41bd
+
+image_type:
+  aws: raw
+  azure: vhd

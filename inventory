@@ -30,7 +30,7 @@ ansible_become_password="foobar"
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 [builder:vars]
-ansible_user=cloud-user
+ansible_user=fedora
 ansible_private_key_file="{{ playbook_dir }}/lctp_os_key.private"
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 

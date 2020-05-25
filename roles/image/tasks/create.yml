@@ -3,7 +3,7 @@
   dnf:
     name:
       - curl
-      - nfs-utils
+      # - nfs-utils
       - expect
       - sed
       - tar
@@ -13,33 +13,33 @@
     state: latest
   become: yes
 
-- name: copy /etc/exports
-  template:
-    src: exports.j2
-    dest: /etc/exports
-  become: yes
+# - name: copy /etc/exports
+#   template:
+#     src: exports.j2
+#     dest: /etc/exports
+#   become: yes
 
-- name: start nfs service
-  systemd:
-    name: nfs-server
-    state: started
+# - name: start nfs service
+#   systemd:
+#     name: nfs-server
+#     state: started
 
 - name: generate kickstart file
   template:
-    src: kickstart.j2
-    dest: "/home/cloud-user/{{ os }}.ks"
+    src: ks-cfg.j2
+    dest: "/home/fedora/{{ os }}.ks"
 
 - name: copy virt-install script
   copy:
     src: virt-install-image
-    dest: "/home/cloud-user/virt-install-image"
+    dest: "/home/fedora/virt-install-image"
     mode: '0764'
 
 - name: build qcow2 image first
-  command: /home/cloud-user/virt-install-image /home/cloud-user/{{ os }}.qcow2 {{ os }}.ks {{ repos[os]["baseos"] }}
+  command: /home/fedora/virt-install-image /home/fedora/{{ os }}.qcow2 {{ os }}.ks {{ repos[os]["baseos"] }}
 
-- name: "convert qcow2 to {{ image_type[platform] }}"
-  command: qemu-img convert -O {{ image_type[platform] }} /home/cloud-user/{{ os }}.qcow2 /home/cloud-user/{{ os }}.{{ image_type[platform] }}
+- name: "convert qcow2 to {{ image_type[cloud_platform] }}"
+  command: qemu-img convert -O {{ image_type[cloud_platform] }} /home/fedora/{{ os }}.qcow2 /home/fedora/{{ os }}.{{ image_type[cloud_platform] }}
 
 # comment out for now
 # - name: install osbuild-composer and composer-cli
@@ -53,7 +53,7 @@
 # - name: copy lctp.toml
 #   copy:
 #     src: lctp.toml
-#     dest: /home/cloud-user/lctp.toml
+#     dest: /home/fedora/lctp.toml
 
 # - name: create /etc/osbuild-composer/repositories
 #   file:
@@ -74,7 +74,7 @@
 #   become: yes
 
 # - name: push lctp.toml as blueprint
-#   command: composer-cli blueprints push /home/cloud-user/lctp.toml
+#   command: composer-cli blueprints push /home/fedora/lctp.toml
 
 # - name: show blueprint
 #   command: composer-cli blueprints list
