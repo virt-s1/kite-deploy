@@ -1,4 +1,4 @@
 ---
-- include_tasks: "{{ action }}-{{ platform }}.yml"
+- include_tasks: "{{ action }}-{{ cloud_platform }}.yml"
   when:
-    - platform == "esxi"
+    - cloud_platform == "esxi"

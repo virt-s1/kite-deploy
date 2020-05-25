@@ -1,7 +1,7 @@
 ---
 - name: create kickstart file
   template:
-    src: ks-esxi-cfg.j2
+    src: ks-cfg.j2
     dest: "{{ playbook_dir }}/ks.cfg"
 
 - name: create kickstart iso

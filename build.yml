@@ -10,7 +10,7 @@
         action: prepare
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
-        - image_format == "raw" or image_format == "vhd"
+        - cloud_platform == "aws" or cloud_platform == "azure"
 
 - hosts: esxi
   gather_facts: no
@@ -21,7 +21,6 @@
         name: image
       vars:
         action: build
-        platform: esxi
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
-        - image_format == "vmdk"
+        - cloud_platform == "esxi"
