@@ -58,16 +58,14 @@
   register: ltp_results
   ignore_errors: True
 
-- name: set passed result
-  set_fact:
-    ltp_result: "PASS"
-
-- name: set failed result
+- name: set result FAIL by default
   set_fact:
     ltp_result: "FAIL"
-  when:
-    - ltp_results.failed is defined
-    - ltp_results.failed == "failed"
+
+- name: set result PASS if all tests passed
+  set_fact:
+    ltp_result: "PASS"
+  when: ltp_results is succeeded
 
 - name: fetch log and result folder back
   synchronize:
