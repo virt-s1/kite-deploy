@@ -45,19 +45,14 @@
     port_range_max: 22
     remote_ip_prefix: 0.0.0.0/0
 
-# - name: set nfs rule for security group lctp
-#   os_security_group_rule:
-#     cloud: psi-openstack
-#     security_group: lctp
-#     protocol: tcp
-#     port_range_min: 2049
-#     port_range_max: 2049
-#     remote_ip_prefix: 0.0.0.0/0
+- name: set openstack instance name
+  set_fact:
+    instance_name: "lctp-image-builder-{{ os }}-{{ random_number }}"
 
 - name: deploy instance
   os_server:
     cloud: psi-openstack
-    name: "lctp-image-builder-{{ os }}-{{ random_number }}"
+    name: "{{ instance_name }}"
     image: "{{ images['fedora-32'] }}"
     flavor: "{{ flavor }}"
     network: "{{ network }}"
@@ -65,7 +60,7 @@
     security_groups: lctp
     auto_ip: yes
     wait: yes
-    timeout: 300
+    timeout: 600
     userdata: |
       #!/bin/bash
       dnf -y install python3-dnf python3
@@ -73,7 +68,8 @@
 
 - name: waits until instance is reachable
   wait_for_connection:
-    delay: 5
+    connect_timeout: 10
+    delay: 10
     timeout: 120
 
 - name: add os instance ip into host group builder

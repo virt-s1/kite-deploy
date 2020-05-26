@@ -23,6 +23,30 @@
       when:
         - cloud_platform == "aws" or cloud_platform == "azure"
 
+- hosts: openstack
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: clean-openstack
+      when:
+        - cloud_platform == "aws" or cloud_platform == "azure"
+
+- hosts: aws
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: upload
+      when:
+        - cloud_platform == "aws"
+
 - hosts: esxi
   gather_facts: no
   become: no

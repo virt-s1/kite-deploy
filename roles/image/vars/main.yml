@@ -12,5 +12,5 @@ checksum_sha256:
   fedora-rawhide: 12b7cb51b60162da43f4f8eb308a1a578789b142491229c2e26e8d8f380d41bd
 
 image_type:
-  aws: raw
+  aws: qcow2
   azure: vhd

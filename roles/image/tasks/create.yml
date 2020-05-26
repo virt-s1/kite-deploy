@@ -3,7 +3,6 @@
   dnf:
     name:
       - curl
-      # - nfs-utils
       - expect
       - sed
       - tar
@@ -12,17 +11,6 @@
       - libvirt-daemon-kvm
     state: latest
   become: yes
-
-# - name: copy /etc/exports
-#   template:
-#     src: exports.j2
-#     dest: /etc/exports
-#   become: yes
-
-# - name: start nfs service
-#   systemd:
-#     name: nfs-server
-#     state: started
 
 - name: generate kickstart file
   template:
@@ -40,51 +28,11 @@
 
 - name: "convert qcow2 to {{ image_type[cloud_platform] }}"
   command: qemu-img convert -O {{ image_type[cloud_platform] }} /home/fedora/{{ os }}.qcow2 /home/fedora/{{ os }}.{{ image_type[cloud_platform] }}
+  when: cloud_platform == "azure"
 
-# comment out for now
-# - name: install osbuild-composer and composer-cli
-#   dnf:
-#     name:
-#       - osbuild-composer
-#       - composer-cli
-#     state: latest
-#   become: yes
-
-# - name: copy lctp.toml
-#   copy:
-#     src: lctp.toml
-#     dest: /home/fedora/lctp.toml
-
-# - name: create /etc/osbuild-composer/repositories
-#   file:
-#     path: /etc/osbuild-composer/repositories
-#     state: directory
-#   become: yes
-
-# - name: copy rhel_8_3 repo info
-#   copy:
-#     src: rhel-8.3.json
-#     dest: /etc/osbuild-composer/repositories
-#   become: yes
-
-# - name: start osbuild-composer.socket
-#   systemd:
-#     name: osbuild-composer.socket
-#     state: started
-#   become: yes
-
-# - name: push lctp.toml as blueprint
-#   command: composer-cli blueprints push /home/fedora/lctp.toml
-
-# - name: show blueprint
-#   command: composer-cli blueprints list
-
-# - name: start image building
-#   command: "composer-cli compse start lctp {{ image_type[platform] }}"
-
-# - name: get compose uuid
-#   command: composer-cli compose status | awk '{print $1}'
-#   register: compose_uuid
-
-# - debug:
-#     var: compose_uuid
+- name: fetch image back
+  fetch:
+    src: "/home/fedora/{{ os }}.{{ image_type[cloud_platform] }}"
+    dest: "{{ playbook_dir }}/"
+    validate_checksum: yes
+    flat: yes
