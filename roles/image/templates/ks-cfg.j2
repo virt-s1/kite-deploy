@@ -40,7 +40,7 @@ enabled=1
 gpgcheck=0
 EOF
 {% endif %}
-dnf install -y cloud-init python3 traceroute xinetd dnsmasq dhcp-server telnet tcpdump expect net-tools bind-utils numactl-devel libaio-devel libaio gdb dosfstools sysstat ksh tcsh gcc gcc-c++ git rsync wget curl bc psmisc quota
+dnf install -y cloud-init python3 traceroute xinetd dnsmasq dhcp-server telnet tcpdump expect net-tools bind-utils numactl-devel libaio-devel libaio gdb dosfstools sysstat ksh tcsh gcc gcc-c++ git rsync wget curl bc psmisc quota unzip logrotate bzip2 keyutils
 {% if cloud_platform == "esxi" %}
 dnf install -y open-vm-tools
 {% endif %}

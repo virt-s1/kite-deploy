@@ -71,6 +71,8 @@ if6-addr-adddel_ifconfig
 if6-addr-addlarge_ifconfig
 if6-mtu-change_ip
 if6-mtu-change_ifconfig
+dhcpd_tests
+dnsmasq_tests
 msgstress04
 msgrcv08
 pidfd_send_signal01
