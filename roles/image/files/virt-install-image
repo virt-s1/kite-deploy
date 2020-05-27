@@ -10,6 +10,8 @@ out=$1
 ks=$2
 url=$3
 
+qemu-img create -f qcow2 "$out" 10G
+
 connect="--connect=qemu:///session"
 name=$(basename $1)-builder
 
@@ -46,9 +48,9 @@ supervised_virt_install $connect \
                         --initrd-inject=$ks \
                         --extra-args="ks=file:/$ks console=ttyS0,115200" \
                         --name=$name \
-                        --disk "path=$out,format=qcow2,size=10" \
+                        --disk "path=$out,format=qcow2" \
                         --ram 4096 \
-                        --vcpus=2 \
+                        --vcpus=1 \
                         --os-type linux \
                         --os-variant rhel8-unknown \
                         --location="$url" \
