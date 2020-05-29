@@ -8,6 +8,7 @@
         name: image
       vars:
         action: prepare
+        target: openstack
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws" or cloud_platform == "azure"
@@ -19,6 +20,7 @@
         name: image
       vars:
         action: create
+        target: openstack
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws" or cloud_platform == "azure"
@@ -31,12 +33,13 @@
     - include_role:
         name: image
       vars:
-        action: clean-openstack
+        action: clean
+        target: openstack
       when:
         - cloud_platform == "aws" or cloud_platform == "azure"
 
 - hosts: aws
-  gather_facts: no
+  gather_facts: yes
   become: no
 
   tasks:
@@ -44,6 +47,8 @@
         name: image
       vars:
         action: upload
+        target: "{{ cloud_platform }}"
+        os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws"
 

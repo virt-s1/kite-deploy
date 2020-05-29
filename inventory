@@ -14,6 +14,8 @@ localhost
 
 [builder]
 
+[dder]
+
 [cloud:children]
 esxi
 aws
@@ -32,6 +34,11 @@ ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/
 [builder:vars]
 ansible_user=fedora
 ansible_private_key_file="{{ playbook_dir }}/lctp_os_key.private"
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+[dder:vars]
+ansible_user=fedora
+ansible_private_key_file="{{ playbook_dir }}/lctp_ec2_key.private"
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 [all:vars]

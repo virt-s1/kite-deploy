@@ -16,6 +16,12 @@
 - name: save clouds.yaml to ~/.config/openstack
   command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ role_path }}/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
 
+- name: remove old openstack keypair
+  os_keypair:
+    cloud: psi-openstack
+    state: absent
+    name: lctp_os_key
+
 - name: create a new openstack keypair
   os_keypair:
     cloud: psi-openstack
@@ -67,10 +73,11 @@
   register: instance_result
 
 - name: waits until instance is reachable
-  wait_for_connection:
-    connect_timeout: 10
+  wait_for:
+    host: "{{ instance_result.openstack.public_v4 }}"
+    port: 22
+    search_regex: OpenSSH
     delay: 10
-    timeout: 120
 
 - name: add os instance ip into host group builder
   add_host:

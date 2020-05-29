@@ -14,7 +14,7 @@
 
 - name: generate kickstart file
   template:
-    src: ks-cfg.j2
+    src: "rhel-8-{{ cloud_platform }}-ks-cfg.j2"
     dest: "/home/fedora/{{ os }}.ks"
 
 - name: copy virt-install script

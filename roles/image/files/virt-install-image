@@ -57,6 +57,6 @@ supervised_virt_install $connect \
                         --nographics \
                         --noreboot
 
-rm $ks
+# rm $ks
 
 cleanup_builder_vm

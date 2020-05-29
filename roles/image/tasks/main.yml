@@ -3,6 +3,6 @@
   when:
     - cloud_platform == "esxi"
 
-- include_tasks: "{{ action }}.yml"
+- include_tasks: "{{ action }}-{{ target }}.yml"
   when:
     - cloud_platform == "aws" or cloud_platform == "azure"

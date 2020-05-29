@@ -10,3 +10,5 @@ tmp/
 *.private
 ks.cfg
 *.iso
+*.qcow2
+*.ks
