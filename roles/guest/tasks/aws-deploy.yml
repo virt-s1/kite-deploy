@@ -123,7 +123,7 @@
     region: "{{ aws_region }}"
     assign_public_ip: yes
     group_id: "{{ ec2_security_group.group_id }}"
-    image: "{{ lookup('aws_ssm', ami_id_key) }}"
+    image: "{{ lookup('aws_ssm', ami_id_key, region=aws_region, decrypt=False) }}"
     instance_type: "{{ random_instance_type }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet.subnet.id }}"
     key_name: "lctp.testguest.{{ os }}"
