@@ -49,10 +49,17 @@
         validate_certs: no
         esxi_hostname: "{{ esxi_host }}"
       register: host_facts
+      when: cloud_platform == "esxi"
 
     - name: set cloud info varaible
       set_fact:
         cloud_info: "{{ host_facts.ansible_facts.ansible_distribution }}-{{ host_facts.ansible_facts.ansible_distribution_version }}"
+      when: cloud_platform == "esxi"
+
+    - name: set cloud info variable
+      set_fact:
+        cloud_info: "AWS-EC2-{{ aws_region }}-{{ random_instance_type }}"
+      when: cloud_platform == "aws"
 
     - include_role:
         name: umb

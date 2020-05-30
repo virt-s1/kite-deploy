@@ -304,39 +304,3 @@
     region: "{{ aws_region }}"
     group_id: "{{ ec2_security_group.group_id }}"
     state: absent
-
-- name: delete vpc route table
-  ec2_vpc_route_table:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    region: "{{ aws_region }}"
-    vpc_id: "{{ ec2_vpc.vpc.id }}"
-    lookup: id
-    route_table_id: "{{ ec2_vpc_route_table.route_table_id }}"
-    state: absent
-
-- name: delete vpc subnet
-  ec2_vpc_subnet:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    region: "{{ aws_region }}"
-    vpc_id: "{{ ec2_vpc.vpc.id }}"
-    cidr: "172.30.30.0/24"
-    state: absent
-
-- name: delete igw
-  ec2_vpc_igw:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    region: "{{ aws_region }}"
-    vpc_id: "{{ ec2_vpc.vpc.id }}"
-    state: absent
-
-- name: delete vpc
-  ec2_vpc_net:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
-    cidr_block: "172.30.0.0/16"
-    state: absent

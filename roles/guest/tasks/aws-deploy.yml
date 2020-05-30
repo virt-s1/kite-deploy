@@ -1,0 +1,152 @@
+---
+- name: random number for instance type
+  set_fact:
+    instance_type_index: "{{ 2 | random(start=0) }}"
+
+- name: set random instance type
+  set_fact:
+    random_instance_type: "{{ instance_type[instance_type_index] }}"
+
+- name: get all availability zones
+  aws_az_info:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+  register: ec2_zones
+
+- debug:
+    var: ec2_zones
+
+- name: create VPC
+  ec2_vpc_net:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    name: "lctp.testguest.{{ os }}"
+    cidr_block: "172.31.0.0/16"
+    tags:
+      lctp: "lctp.testguest.{{ os }}"
+  register: ec2_vpc
+
+- debug:
+    var: ec2_vpc
+
+- name: add internet gateway for VPC
+  ec2_vpc_igw:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ ec2_vpc.vpc.id }}"
+    tags:
+      lctp: "lctp.testguest.{{ os }}"
+  register: ec2_vpc_igw
+
+- debug:
+    var: ec2_vpc_igw
+
+- name: "create subnet for VPC in {{ ec2_zones.availability_zones[0] }}"
+  ec2_vpc_subnet:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ ec2_vpc.vpc.id }}"
+    cidr: "172.31.31.0/24"
+    az: "{{ ec2_zones.availability_zones[-2].zone_name }}"
+    tags:
+      lctp: "lctp.testguest.{{ os }}"
+  register: ec2_vpc_subnet
+
+- debug:
+    var: ec2_vpc_subnet
+
+- name: add default route in route table for all vpc subnets
+  ec2_vpc_route_table:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ ec2_vpc.vpc.id }}"
+    subnets:
+      - "{{ ec2_vpc_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ ec2_vpc_igw.gateway_id }}"
+    tags:
+      lctp: "lctp.testguest.{{ os }}"
+  register: ec2_vpc_route_table
+
+- debug:
+    var: ec2_vpc_route_table
+
+- name: get localhost public ip address
+  uri:
+    url: https://api.ipify.org?format=json
+  register: result_ip
+
+- debug:
+    var: result_ip
+
+- name: create security group
+  ec2_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ ec2_vpc.vpc.id }}"
+    name: "lctp.testguest.{{ os }}.{{ job_number }}"
+    description: lctp security group
+    rules:
+      - proto: all
+        cidr_ip: "{{ result_ip.json.ip }}/32"
+    tags:
+      lctp: "lctp.testguest.{{ os }}.{{ job_number }}"
+  register: ec2_security_group
+
+- debug:
+    var: ec2_security_group
+
+- name: config ssh keypair used by test
+  ec2_key:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    name: "lctp.testguest.{{ os }}"
+    key_material: "{{ lookup('file', 'key/identity.pub')  }}"
+  register: result_keypair
+
+- name: set ami id key
+  set_fact:
+    ami_id_key: "lctp_imagebuild_{{ os }}"
+
+- name: create ec2 instance
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    assign_public_ip: yes
+    group_id: "{{ ec2_security_group.group_id }}"
+    image: "{{ lookup('aws_ssm', ami_id_key) }}"
+    instance_type: "{{ random_instance_type }}"
+    vpc_subnet_id: "{{ ec2_vpc_subnet.subnet.id }}"
+    key_name: "lctp.testguest.{{ os }}"
+    zone: "{{ ec2_zones.availability_zones[-2].zone_name }}"
+    instance_initiated_shutdown_behavior: terminate # required by spot instances
+    spot_price: "0.1"
+    spot_type: one-time
+    state: present
+    volumes:
+    - device_name: /dev/sda1
+      volume_size: 12
+      volume_type: gp2
+      delete_on_termination: true
+    instance_tags:
+      lctp: "lctp.testguest.{{ os }}.{{ job_number }}"
+    wait: yes
+  register: ec2_instance
+
+- debug:
+    var: ec2_instance
+
+- name: add guest ip into host guest group
+  add_host:
+    name: "{{ ec2_instance.instances[0].public_ip }}"
+    groups: guest
+    kernel_nvr: "{{ kernel_nvr }}"
