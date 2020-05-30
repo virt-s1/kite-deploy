@@ -137,7 +137,7 @@
     spot_type: one-time
     state: present
     volumes:
-    - device_name: /dev/sda1
+    - device_name: /dev/xvda
       volume_size: 12
       volume_type: gp2
       delete_on_termination: true
@@ -149,8 +149,23 @@
 - debug:
     var: ec2_instance
 
+- name: waits until ssh is reachable
+  wait_for:
+    host: "{{ ec2_instance.instances[0].public_ip }}"
+    port: 22
+    search_regex: OpenSSH
+    delay: 10
+
 - name: add guest ip into host guest group
   add_host:
     name: "{{ ec2_instance.instances[0].public_ip }}"
     groups: guest
     kernel_nvr: "{{ kernel_nvr }}"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ ec2_instance.instances[0].public_ip }}"

@@ -9,5 +9,5 @@ fedora_east_1_gp2_ami: ami-09f17ac4a76fd9ffe
 # instance type covered by test
 instance_type:
   "0": t2.medium
-  "1": t3.medium
-  "2": t3a.medium
+  "1": t2.medium
+  "2": t2.medium
