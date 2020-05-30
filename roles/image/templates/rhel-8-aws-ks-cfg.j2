@@ -53,8 +53,6 @@ rm -f /etc/systemd/system/default.target
 ln -s /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
 echo .
 
-dnf -C -y remove linux-firmware
-
 # Remove firewalld; it is required to be present for install/image building.
 # but we dont ship it in cloud
 dnf -C -y remove firewalld --setopt="clean_requirements_on_remove=1"
@@ -220,7 +218,6 @@ redhat-release
 rng-tools
 
 python3
-linux-firmware
 traceroute
 xinetd
 dnsmasq
