@@ -1,4 +1,16 @@
 ---
+- name: create $HOME/.aws folder to dave config and credentials
+  file:
+    path: ~/.aws
+    state: directory
+    mode: '0755'
+
+- name: create credentials file
+  template:
+    src: aws_credentials.j2
+    dest: ~/.aws/credentials
+    mode: '0600'
+
 - name: random number for instance type
   set_fact:
     instance_type_index: "{{ 2 | random(start=0) }}"
@@ -9,8 +21,7 @@
 
 - name: get all availability zones
   aws_az_info:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
   register: ec2_zones
 
@@ -19,8 +30,7 @@
 
 - name: create VPC
   ec2_vpc_net:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     name: "lctp.testguest.{{ os }}"
     cidr_block: "172.31.0.0/16"
@@ -33,8 +43,7 @@
 
 - name: add internet gateway for VPC
   ec2_vpc_igw:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     tags:
@@ -46,8 +55,7 @@
 
 - name: "create subnet for VPC in {{ ec2_zones.availability_zones[0] }}"
   ec2_vpc_subnet:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     cidr: "172.31.31.0/24"
@@ -61,8 +69,7 @@
 
 - name: add default route in route table for all vpc subnets
   ec2_vpc_route_table:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     subnets:
@@ -87,8 +94,7 @@
 
 - name: create security group
   ec2_group:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     name: "lctp.testguest.{{ os }}.{{ job_number }}"
@@ -105,8 +111,7 @@
 
 - name: config ssh keypair used by test
   ec2_key:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     name: "lctp.testguest.{{ os }}"
     key_material: "{{ lookup('file', 'key/identity.pub')  }}"
@@ -118,12 +123,11 @@
 
 - name: create ec2 instance
   ec2:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     assign_public_ip: yes
     group_id: "{{ ec2_security_group.group_id }}"
-    image: "{{ lookup('aws_ssm', ami_id_key, region=aws_region, decrypt=False) }}"
+    image: "{{ lookup('aws_ssm', ami_id_key, region=aws_region, decrypt=False, aws_profile=aws_profile) }}"
     instance_type: "{{ random_instance_type }}"
     vpc_subnet_id: "{{ ec2_vpc_subnet.subnet.id }}"
     key_name: "lctp.testguest.{{ os }}"

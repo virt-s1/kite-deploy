@@ -1,8 +1,7 @@
 ---
 - name: terminate instance
   ec2:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     instance_ids: "{{ ec2_instance.instance_ids[0] }}"
     state: absent
@@ -10,8 +9,7 @@
 
 - name: delete security group
   ec2_group:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     group_id: "{{ ec2_security_group.group_id }}"
     state: absent

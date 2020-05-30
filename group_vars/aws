@@ -1,6 +1,7 @@
 aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
 aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
 aws_region: "{{ lookup('env', 'AWS_REGION') }}"
+aws_profile: "default"
 
 # fedora 32 gp2 hvm ami id
 fedora_east_1_gp2_ami: ami-09f17ac4a76fd9ffe
