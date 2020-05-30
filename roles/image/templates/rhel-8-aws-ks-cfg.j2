@@ -109,8 +109,8 @@ EOL
 echo "RUN_FIRSTBOOT=NO" > /etc/sysconfig/firstboot
 
 # centos cloud user
-echo -e 'centos\tALL=(ALL)\tNOPASSWD: ALL' >> /etc/sudoers
-sed -i 's/name: cloud-user/name: centos/g' /etc/cloud/cloud.cfg
+echo -e 'admin\tALL=(ALL)\tNOPASSWD: ALL' >> /etc/sudoers
+sed -i 's/name: cloud-user/name: admin/g' /etc/cloud/cloud.cfg
 
 dnf clean all
 
