@@ -1,0 +1,61 @@
+url --url {{ repos[os]["baseos"] }}
+text
+shutdown
+lang en_US.UTF-8
+keyboard --vckeymap=us --xlayouts='us'
+repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100
+repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100
+network  --bootproto=dhcp --device=link --activate --onboot=on
+firewall --enabled --ssh
+selinux --enforcing
+rootpw --lock --iscrypted $6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
+user --name=admin --groups=wheel --iscrypted --password=$6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
+sshkey --username=admin "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC8/I14u/Dtp7nUAK90HdNeMCF1qclpvKJkwUd9Jc27C/IvGuPryLRumt6y3GIUAHXxFRQ2Cd+2fToEwxOm0NCVGO0cpXkLg6l9Fs+6Spjf1W3IrrMGiEtAMYA7DZwNRqFVcmDOZnOpyVRi6yBktHN4cx7mMsu0UY6jufhLGTtfU+iOpD5xnS8lvbRkCDzSDwaqx9/1v0t59YzbYnhdKEaeuMHIN3SwcjbyhRiLBdjfbG8ydVXgu+eiW8FTqOwZkdzNn4P8rg6ekS22S3l/q5j1kJidcy8haajc4pnCRfX3CXWKQIy1XCYHHnXgvnjLlKgLKfPX7U4U9c3M1ULP1h969C8pmr61koxkrzXi8Qc9VvHEP8P8q4cDOpMXaokGTChoT6fEM70ylD4WGnKipH8VnM13V+VVWeYtVjQtF1UJDyPEFpjQREhBDcKT2t50zXkUEhDno2lLm6DSf1q+r7823ItpEYiBRZYjpW9Do4PkvGooFxrO7tttmYkSrD2ByAk= linux-cloud-test"
+timezone --utc Asia/Shanghai
+services --enabled="NetworkManager,sshd,rsyslog,chronyd,cloud-init,cloud-init-local"
+reboot --eject
+bootloader --location=mbr --append="console=ttyS0,115200 net.ifnames=0 biosdevname=0"
+zerombr
+clearpart --all --initlabel
+autopart
+
+%packages
+@core
+open-vm-tools
+chrony
+NetworkManager
+dnf
+yum
+dnf-utils
+yum-utils
+cloud-init
+cloud-utils-growpart
+python3
+traceroute
+xinetd
+dnsmasq
+dhcp-server
+telnet
+tcpdump
+expect
+net-tools
+bind-utils
+numactl-devel
+libaio-devel
+libaio
+gdb
+dosfstools
+sysstat
+ksh
+tcsh
+gcc
+gcc-c++
+git
+rsync
+wget
+curl
+bc
+psmisc
+quota
+%end
+
