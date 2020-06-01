@@ -3,8 +3,8 @@ text
 shutdown
 lang en_US.UTF-8
 keyboard --vckeymap=us --xlayouts='us'
-repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100
-repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100
+repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100 --install
+repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100 --install
 network  --bootproto=dhcp --device=link --activate --onboot=on
 firewall --enabled --ssh
 selinux --enforcing
