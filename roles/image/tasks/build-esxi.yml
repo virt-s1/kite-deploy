@@ -125,6 +125,14 @@
       retries: 30
       delay: 1
 
+- name: waits until instance is reachable
+  wait_for:
+    host: "{{ new_guest.instance.ipv4 }}"
+    port: 22
+    search_regex: OpenSSH
+    delay: 10
+    timeout: 1800
+
 - name: guest smoking test
   vmware_vm_shell:
     hostname: "{{ vsphere_server }}"
