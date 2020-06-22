@@ -13,7 +13,7 @@
 
 - name: reboot guest for new kernel to make effect
   reboot:
-    reboot_timeout: 300
+    reboot_timeout: 1200
   become: yes
 
 - name: get current kernel version
