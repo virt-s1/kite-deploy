@@ -1,6 +1,6 @@
 # kite-deploy
 
-kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on all kinds of public and private cloud platform.
+kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, Azure, etc.
 
 kite-deploy will provide an easy way to setup Linux guest/instance/VM, build and maintain Linux image on public and private cloud platform.
 
@@ -84,8 +84,8 @@ You can set these environment variables to configure to run kite-deploy
 
     AWS_REGION        AWS region
 
-    AWS_INSTANCE_TPYE     AWS instance type. We suggested type:
-                              "t2.medium" Xen based instance with xen_netfront NIC
-                              "t3.medium" KVM based instance with Elastic Network Adapter (ena)
+    AWS_INSTANCE_TPYE     AWS instance type. Suggested instance types:
+                              "t2.medium": Xen based instance with xen_netfront NIC
+                              "t3.medium": KVM based instance with Elastic Network Adapter (ena)
                               "t3a.medium": KVM based instance with AMD CPU
                               "m4.large": Xen based instance with the Intel 82599 VF interface (SRIOV)
