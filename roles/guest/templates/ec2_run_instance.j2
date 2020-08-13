@@ -1,0 +1,25 @@
+#!/bin/bash
+
+aws --profile={{ aws_profile }} --region={{ aws_region }} ec2 run-instances \
+    --associate-public-ip-address \
+    --block-device-mappings DeviceName=/dev/xvda,Ebs=\{DeleteOnTermination=true,VolumeSize=12,VolumeType=gp2,Encrypted=false\} \
+{% if random_instance_type.startswith('t3') %}
+    --credit-specification CpuCredits=standard \
+{% endif %}
+    --image-id {{ lookup('aws_ssm', ami_id_key, region=aws_region, decrypt=False, aws_profile=aws_profile) }} \
+{% if spot_instance %}
+    --instance-market-options MarketType=spot,SpotOptions=\{MaxPrice=0.1,SpotInstanceType=one-time,InstanceInterruptionBehavior=terminate\} \
+{% endif %}
+    --instance-type {{ random_instance_type }} \
+    --key-name kite.guest.{{ os }} \
+    --security-group-ids {{ ec2_security_group.group_id }} \
+    --subnet-id {{ ec2_vpc_subnet.subnet.id }} \
+    --tag-specifications ResourceType=instance,Tags=[\{Key=kite,Value='kite.guest.{{ os }}'\},\{Key=name,Value='{{ instance_tag }}'\}] \
+
+return_code=$?
+if [[ $return_code == 0 ]]; then
+  exit 0
+fi
+
+# If we had no successful boots, we should exit with a failure.
+exit 1

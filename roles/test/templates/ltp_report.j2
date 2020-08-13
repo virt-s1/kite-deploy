@@ -1,3 +1,0 @@
-{% for result in ltp_results.results %}
-{{ result.item }} {{ "FAIL" if result.failed else "PASS" }} {{ result.delta }}
-{% endfor %}

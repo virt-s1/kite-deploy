@@ -1,4 +1,8 @@
 ---
+- name: random number for unique instance tag
+  set_fact:
+    tmp_num: "{{ 999 | random(start=101) }}"
+
 - name: "clone vm from template {{ esxi_template }} on {{ esxi_host }}"
   vmware_guest:
     hostname: "{{ vsphere_server }}"
@@ -6,14 +10,14 @@
     password: "{{ vsphere_password }}"
     validate_certs: no
     datacenter: "{{ esxi_datacenter }}"
-    name: "{{ esxi_guest_name }}"
+    name: "{{ project }}-{{ esxi_firmware }}-{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
     folder: ""
     state: poweredon
     template: "{{ esxi_template }}"
     disk:
-    - size_gb: "{{ esxi_disk_gb }}"
-      type: thin
-      datastore: "{{ esxi_datastore }}"
+      - size_gb: "{{ esxi_disk_gb }}"
+        type: thin
+        datastore: "{{ esxi_datastore }}"
     hardware:
       num_cpus: "{{ esxi_cpu }}"
       hotadd_cpu: True
@@ -23,10 +27,10 @@
       scsi: paravirtual
       boot_firmware: "{{ esxi_firmware }}"
     networks:
-    - name: "{{ esxi_network }}"
-      device_type: "{{ esxi_nic_type }}"
-      start_connected: true
-      type: dhcp
+      - name: "{{ esxi_network }}"
+        device_type: "{{ esxi_nic_type }}"
+        start_connected: true
+        type: dhcp
     wait_for_ip_address: yes
   register: new_guest
 
@@ -126,8 +130,18 @@
     snapshot_name: "{{ esxi_snapshot_name }}"
     description: "snapshot for running {{ project }} test"
 
-- name: add guest ip into host group esxi_guest_group
-  add_host:
-    name: "{{ facts.instance.ipv4 }}"
-    groups: guest
-    kernel_nvr: "{{ kernel_nvr }}"
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    value: "{{ facts.instance.ipv4 }}"
+    no_extra_spaces: yes
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: uuid
+    value: "{{ hw_uuid }}"
+    no_extra_spaces: yes

@@ -1,6 +1,0 @@
----
-- include_tasks: "{{ project }}-{{ action }}.yml"
-  when: action == "download"
-
-- include_tasks: "{{ action }}.yml"
-  when: action == "install"

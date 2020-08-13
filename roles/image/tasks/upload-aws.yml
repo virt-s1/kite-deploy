@@ -1,8 +1,19 @@
 ---
+- name: create $HOME/.aws folder to dave config and credentials
+  file:
+    path: ~/.aws
+    state: directory
+    mode: '0755'
+
+- name: create credentials file
+  template:
+    src: aws_credentials.j2
+    dest: ~/.aws/credentials
+    mode: '0600'
+
 - name: get all availability zones
   aws_az_info:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
   register: ec2_zones
 
@@ -11,13 +22,12 @@
 
 - name: create VPC
   ec2_vpc_net:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
+    name: "kite.imagebuild.{{ os }}"
     cidr_block: "172.30.0.0/16"
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_vpc
 
 - debug:
@@ -25,12 +35,11 @@
 
 - name: add internet gateway for VPC
   ec2_vpc_igw:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_vpc_igw
 
 - debug:
@@ -38,14 +47,13 @@
 
 - name: "create subnet for VPC in {{ ec2_zones.availability_zones[0] }}"
   ec2_vpc_subnet:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     cidr: "172.30.30.0/24"
     az: "{{ ec2_zones.availability_zones[-2].zone_name }}"
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_vpc_subnet
 
 - debug:
@@ -53,8 +61,7 @@
 
 - name: add default route in route table for all vpc subnets
   ec2_vpc_route_table:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     subnets:
@@ -63,7 +70,7 @@
       - dest: 0.0.0.0/0
         gateway_id: "{{ ec2_vpc_igw.gateway_id }}"
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_vpc_route_table
 
 - debug:
@@ -79,17 +86,16 @@
 
 - name: create security group
   ec2_group:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
-    name: "lctp.imagebuild.{{ os }}"
-    description: lctp security group
+    name: "kite.imagebuild.{{ os }}"
+    description: kite security group
     rules:
       - proto: all
         cidr_ip: "{{ result_ip.json.ip }}/32"
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_security_group
 
 - debug:
@@ -97,40 +103,28 @@
 
 - name: delete keypare first if exist
   ec2_key:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
+    name: "kite.imagebuild.{{ os }}"
     state: absent
 
 - name: generate and add ssh keypair
   ec2_key:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
-  register: result_keypair
-
-- debug:
-    var: result_keypair
-
-- name: save private key to file
-  copy:
-    content: "{{ result_keypair.key.private_key }}"
-    dest: "lctp_ec2_key.private"
-    mode: '0600'
+    name: "kite.imagebuild.{{ os }}"
+    key_material: "{{ lookup('file', 'key/identity.pub')  }}"
 
 - name: create ec2 instance
   ec2:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     assign_public_ip: yes
     group_id: "{{ ec2_security_group.group_id }}"
     image: "{{ fedora_east_1_gp2_ami }}"
     instance_type: t2.medium
     vpc_subnet_id: "{{ ec2_vpc_subnet.subnet.id }}"
-    key_name: "lctp.imagebuild.{{ os }}"
+    key_name: "kite.imagebuild.{{ os }}"
     zone: "{{ ec2_zones.availability_zones[-2].zone_name }}"
     instance_initiated_shutdown_behavior: terminate # required by spot instances
     spot_price: "0.1"
@@ -145,7 +139,7 @@
       #!/bin/bash
       dnf -y install python3-dnf python3 qemu-img
     instance_tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
     wait: yes
   register: ec2_instance
 
@@ -154,8 +148,7 @@
 
 - name: attach a new volume for dd
   ec2_vol:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     instance: "{{ ec2_instance.instance_ids[0] }}"
     name: image_snapshot
@@ -164,7 +157,7 @@
     volume_size: "12"
     volume_type: gp2
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_volume
 
 - debug:
@@ -182,7 +175,7 @@
     name: "{{ ec2_instance.instances[0].public_ip }}"
     group: dder
     ansible_user: fedora
-    ansible_private_key_file: "{{ playbook_dir }}/lctp_ec2_key.private"
+    ansible_private_key_file: "{{ playbook_dir }}/key/identity"
     ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     ansible_python_interpreter: /usr/bin/python3
 
@@ -208,8 +201,7 @@
 
 - name: terminate instance
   ec2:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     instance_ids: "{{ ec2_instance.instance_ids[0] }}"
     state: absent
@@ -217,13 +209,12 @@
 
 - name: make snapshot of attached volume
   ec2_snapshot:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     volume_id: "{{ ec2_volume.volume_id }}"
     description: "snapshot {{ os }} image taken on {{ ansible_date_time.iso8601  }}"
     snapshot_tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_snapshot
 
 - debug:
@@ -231,11 +222,10 @@
 
 - name: get old ami info
   ec2_ami_info:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     filters:
-      "tag:lctp": "lctp.imagebuild.{{ os }}"
+      "tag:kite": "kite.imagebuild.{{ os }}"
   register: result_ami
 
 - debug:
@@ -243,8 +233,7 @@
 
 - name: deregister old amis
   ec2_ami:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     image_id: "{{ item }}"
     delete_snapshot: True
@@ -253,10 +242,9 @@
 
 - name: AMI registration from EBS Snapshot
   ec2_ami:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
+    name: "kite.imagebuild.{{ os }}"
     description: "{{ os }} ami built on {{ ansible_date_time.iso8601  }}"
     state: present
     architecture: x86_64
@@ -268,8 +256,10 @@
         snapshot_id: "{{ ec2_snapshot.snapshot_id }}"
         delete_on_termination: true
         volume_type: gp2
+    enhanced_networking: yes
+    sriov_net_support: simple
     tags:
-      lctp: "lctp.imagebuild.{{ os }}"
+      kite: "kite.imagebuild.{{ os }}"
   register: ec2_ami
 
 - debug:
@@ -277,33 +267,29 @@
 
 - name: save ami id into ssm parameter store
   aws_ssm_parameter_store:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp_imagebuild_{{ os }}"
+    name: "kite_imagebuild_{{ os }}"
     description: "Save latest {{ os }} image id"
     value: "{{ ec2_ami.image_id }}"
 
 - name: delete the 2nd EBS volume
   ec2_vol:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     id: "{{ ec2_volume.volume_id }}"
     state: absent
 
 - name: delete keypair
   ec2_key:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "lctp.imagebuild.{{ os }}"
+    name: "kite.imagebuild.{{ os }}"
     state: absent
 
 - name: delete security group
   ec2_group:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     group_id: "{{ ec2_security_group.group_id }}"
     state: absent

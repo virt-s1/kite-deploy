@@ -8,11 +8,11 @@
 - name: remove security group
   os_security_group:
     cloud: psi-openstack
-    name: lctp
+    name: kite-image
     state: absent
 
 - name: remove keypair
   os_keypair:
     cloud: psi-openstack
-    name: lctp_os_key
+    name: kite-image-key
     state: absent

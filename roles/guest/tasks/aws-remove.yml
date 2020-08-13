@@ -3,7 +3,7 @@
   ec2:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    instance_ids: "{{ ec2_instance.instance_ids[0] }}"
+    instance_ids: "{{ instance_id }}"
     state: absent
     wait: yes
 
@@ -11,5 +11,5 @@
   ec2_group:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    group_id: "{{ ec2_security_group.group_id }}"
+    group_id: "{{ group_id }}"
     state: absent

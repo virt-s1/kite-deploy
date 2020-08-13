@@ -5,7 +5,7 @@
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
     validate_certs: no
-    name: "{{ esxi_guest_name }}"
+    uuid: "{{ uuid }}"
     state: powered-off
 
 - name: remove guest from disk
@@ -14,5 +14,5 @@
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
     validate_certs: no
-    name: "{{ esxi_guest_name }}"
+    uuid: "{{ uuid }}"
     state: absent

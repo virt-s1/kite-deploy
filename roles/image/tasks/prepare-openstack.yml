@@ -10,7 +10,7 @@
 
 - name: set vault password file
   copy:
-    content: "{{ lookup('env', 'VSPHERE_PASSWORD') }}"
+    content: "{{ lookup('env', 'VAULT_PASSWORD') }}"
     dest: "~/.config/ansible-vault"
 
 - name: save clouds.yaml to ~/.config/openstack
@@ -20,32 +20,26 @@
   os_keypair:
     cloud: psi-openstack
     state: absent
-    name: lctp_os_key
+    name: kite-image-key
 
 - name: create a new openstack keypair
   os_keypair:
     cloud: psi-openstack
     state: present
-    name: lctp_os_key
-  register: lctp_os_keypair
-
-- name: save private key to file
-  copy:
-    content: "{{ lctp_os_keypair.key.private_key }}"
-    dest: "lctp_os_key.private"
-    mode: '0600'
+    name: kite-image-key
+    public_key_file: "{{ playbook_dir }}/key/identity.pub"
 
 - name: create security group
   os_security_group:
     cloud: psi-openstack
-    name: lctp
+    name: kite-image
     state: present
-    description: security group for lctp image build server
+    description: security group for kite image build server
 
-- name: set ssh rule for security group lctp
+- name: set ssh rule for security group kite
   os_security_group_rule:
     cloud: psi-openstack
-    security_group: lctp
+    security_group: kite-image
     protocol: tcp
     port_range_min: 22
     port_range_max: 22
@@ -53,7 +47,7 @@
 
 - name: set openstack instance name
   set_fact:
-    instance_name: "lctp-image-builder-{{ os }}-{{ random_number }}"
+    instance_name: "kite-image-builder-{{ os }}-{{ random_number }}"
 
 - name: deploy instance
   os_server:
@@ -62,8 +56,8 @@
     image: "{{ images['fedora-32'] }}"
     flavor: "{{ flavor }}"
     network: "{{ network }}"
-    key_name: lctp_os_key
-    security_groups: lctp
+    key_name: kite-image-key
+    security_groups: kite-image
     auto_ip: yes
     wait: yes
     timeout: 600
