@@ -1,10 +1,9 @@
 url --url {{ repos[os]["baseos"] }}
 text
-shutdown
 lang en_US.UTF-8
 keyboard --vckeymap=us --xlayouts='us'
-repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100 --install
-repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100 --install
+repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100
+repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100
 network  --bootproto=dhcp --device=link --activate --onboot=on
 firewall --enabled --ssh
 selinux --enforcing
@@ -18,6 +17,25 @@ bootloader --location=mbr --append="console=ttyS0,115200 net.ifnames=0 biosdevna
 zerombr
 clearpart --all --initlabel
 autopart
+
+%post --log=/var/log/anaconda/post-install.log --erroronfail
+cat <<EOF > /etc/yum.repos.d/nightly.repo
+[RHEL-8-NIGHTLY-BaseOS]
+name=baseos
+baseurl={{ repos[os]["baseos"] }}
+enabled=1
+gpgcheck=0
+
+[RHEL-8-NIGHTLY-AppStream]
+name=appstream
+baseurl={{ repos[os]["appstream"] }}
+enabled=1
+gpgcheck=0
+EOF
+
+true
+
+%end
 
 %packages
 @core
@@ -58,4 +76,3 @@ bc
 psmisc
 quota
 %end
-
