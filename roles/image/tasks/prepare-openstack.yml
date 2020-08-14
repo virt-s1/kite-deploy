@@ -77,3 +77,8 @@
   add_host:
     name: "{{ instance_result.openstack.public_v4 }}"
     groups: builder
+
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
