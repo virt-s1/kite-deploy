@@ -2,8 +2,9 @@
 name: RHEL 8.3 ESXi-7.0 image
 
 on:
-  schedule:
-    - '5 8 * * 0'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   esxi7_bios:
@@ -24,7 +25,6 @@ jobs:
           curl -X PUT $KITE_CONTROLLER_API_NETLOC/runner/delete/$RUNNER_NAME > /dev/null 2>&1 &
 
   esxi7_efi:
-    needs: esxi7_bios
     name: build rhel 8.3 esxi 7.0 efi image
     runs-on: kite-runner
 

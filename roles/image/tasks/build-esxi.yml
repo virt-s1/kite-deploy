@@ -5,7 +5,7 @@
     dest: "{{ playbook_dir }}/ks.cfg"
 
 - name: create kickstart iso
-  command: mkisofs -V "OEMDRV" -o "{{ playbook_dir }}/ks.iso" "{{ playbook_dir  }}/ks.cfg"
+  command: mkisofs -V "OEMDRV" -o "{{ playbook_dir }}/ks-{{ esxi_firmware }}.iso" "{{ playbook_dir  }}/ks.cfg"
 
 # rhel-boot.iso and fedora-boot.iso are at lctp-image folder ready
 # - name: "download {{boot_iso[os]}}"
@@ -19,7 +19,18 @@
 #   delay: 3
 #   until: download_result.status_code == 200
 
-- name: "upload ks.iso and {{boot_iso[os]}}"
+- name: "delete ks-{{ esxi_firmware }}.iso if it exists"
+  vsphere_file:
+    host: "{{ vsphere_server }}"
+    username: "{{ vsphere_username }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: no
+    datacenter: "{{ esxi_datacenter }}"
+    datastore: "{{ esxi_datastore }}"
+    path: "ks-{{ esxi_firmware }}.iso"
+    state: absent
+
+- name: "upload ks-{{ esxi_firmware }}.iso"
   vsphere_copy:
     hostname: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
@@ -27,11 +38,8 @@
     validate_certs: no
     datacenter: "{{ esxi_datacenter }}"
     datastore: "{{ esxi_datastore }}"
-    src: "{{playbook_dir}}/{{ item }}"
-    path: "{{ item }}"
-  loop:
-    - ks.iso
-    # - "{{ boot_iso[os] }}"
+    src: "{{ playbook_dir }}/ks-{{ esxi_firmware }}.iso"
+    path: "ks-{{ esxi_firmware }}.iso"
 
 - name: "install {{ os }}"
   vmware_guest:
@@ -46,30 +54,30 @@
     guest_id: "{{ esxi_guest_id }}"
     esxi_hostname: "{{ esxi_host }}"
     disk:
-    - size_gb: 10
-      type: thin
-      datastore: "{{ esxi_datastore }}"
+      - size_gb: 10
+        type: thin
+        datastore: "{{ esxi_datastore }}"
     hardware:
       num_cpus: "{{ esxi_cpu }}"
       memory_mb: "{{ esxi_memory_mb }}"
       scsi: paravirtual
       boot_firmware: "{{ esxi_firmware }}"
     networks:
-    - name: "{{ esxi_network }}"
-      device_type: "{{ esxi_nic_type }}"
-      start_connected: true
-      type: dhcp
+      - name: "{{ esxi_network }}"
+        device_type: "{{ esxi_nic_type }}"
+        start_connected: true
+        type: dhcp
     cdrom:
-    - contcontroller_type: ide
-      controller_number: 0
-      unit_number: 0
-      type: iso
-      iso_path: "[{{ esxi_datastore }}] lctp-image/{{ boot_iso[os] }}"
-    - contcontroller_type: ide
-      controller_number: 0
-      unit_number: 1
-      type: iso
-      iso_path: "[{{ esxi_datastore }}] ks.iso"
+      - contcontroller_type: ide
+        controller_number: 0
+        unit_number: 0
+        type: iso
+        iso_path: "[{{ esxi_datastore }}] lctp-image/{{ boot_iso[os] }}"
+      - contcontroller_type: ide
+        controller_number: 0
+        unit_number: 1
+        type: iso
+        iso_path: "[{{ esxi_datastore }}] ks-{{ esxi_firmware }}.iso"
     wait_for_ip_address: yes
   register: new_guest
 
@@ -167,14 +175,14 @@
     validate_certs: no
     uuid: "{{ hw_uuid }}"
     cdrom:
-    - contcontroller_type: ide
-      controller_number: 0
-      unit_number: 0
-      state: absent
-    - contcontroller_type: ide
-      controller_number: 0
-      unit_number: 1
-      state: absent
+      - contcontroller_type: ide
+        controller_number: 0
+        unit_number: 0
+        state: absent
+      - contcontroller_type: ide
+        controller_number: 0
+        unit_number: 1
+        state: absent
 
 - name: remove current template
   vmware_guest:
@@ -197,7 +205,7 @@
     name: "{{ esxi_template }}"
     is_template: yes
 
-- name: "delete ks.iso and {{ boot_iso[os] }}"
+- name: "clean up ks-{{ esxi_firmware }}.iso finally"
   vsphere_file:
     host: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
@@ -205,8 +213,5 @@
     validate_certs: no
     datacenter: "{{ esxi_datacenter }}"
     datastore: "{{ esxi_datastore }}"
-    path: "{{ item }}"
+    path: "ks-{{ esxi_firmware }}.iso"
     state: absent
-  loop:
-    - ks.iso
-    # - "{{ boot_iso[os] }}"
