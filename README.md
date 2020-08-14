@@ -48,11 +48,11 @@ Image building [kickstart files](https://github.com/henrywang/lctp/tree/master/r
 
 Build ESXi image with:
 
-    ansible-playbook -v -i inventory -e esxi_firmware=<bios or efi> -e cloud_platform=esxi build.yml
+    ansible-playbook -v -i inventory -e esxi_firmware=<bios or efi> -e cloud_platform=esxi build.yaml
 
 Build AWS EC2 AMI image with:
 
-    ansible-playbook -v -i inventory -e cloud_platform=aws build.yml
+    ansible-playbook -v -i inventory -e cloud_platform=aws build.yaml
 
 ## kite-deploy configuration
 
