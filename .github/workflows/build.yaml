@@ -1,0 +1,24 @@
+---
+name: build ESXi-7.0 image
+
+on:
+  schedule:
+    - '5 8 * * 0'
+
+jobs:
+  esxi7_bios:
+    name: build esxi 7.0 bios image
+    runs-on: kite-runner
+
+    steps:
+      - name: Checkout kite-deploy repository
+        uses: actions/checkout@v2
+
+      - name: Build image
+        run: ansible-playbook -v -i inventory -e esxi_firmware=bios -e cloud_platform=esxi build.yml
+
+      - name: Remove runner
+        if: ${{ always() }}
+        run: |
+          RUNNER_NAME=$(cat /etc/hostname)
+          curl -X PUT $KITE_CONTROLLER_API_NETLOC/runner/delete/$RUNNER_NAME > /dev/null 2>&1 &
