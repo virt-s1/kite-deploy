@@ -2,9 +2,9 @@
 name: RHEL 8.3 ESXi-7.0 image
 
 on:
-  pull_request:
-    branches:
-      - master
+  schedule:
+    # At 5:08 every Sunday
+    - cron: '5 8 * * 0'
 
 jobs:
   esxi7_bios:
