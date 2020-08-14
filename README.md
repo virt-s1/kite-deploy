@@ -1,5 +1,7 @@
 # kite-deploy
 
+![RHEL 8.3 ESXi-7.0 image](https://github.com/virt-s1/kite-deploy/workflows/RHEL%208.3%20ESXi-7.0%20image/badge.svg?branch=master)
+
 kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, Azure, etc.
 
 kite-deploy will provide an easy way to setup Linux guest/instance/VM, build and maintain Linux image on public and private cloud platform.
