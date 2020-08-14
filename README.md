@@ -1,5 +1,6 @@
 # kite-deploy
 
+![RHEL 8.3 AWS EC2 AMI](https://github.com/virt-s1/kite-deploy/workflows/RHEL%208.3%20AWS%20EC2%20AMI/badge.svg)
 ![RHEL 8.3 ESXi-7.0 image](https://github.com/virt-s1/kite-deploy/workflows/RHEL%208.3%20ESXi-7.0%20image/badge.svg)
 
 kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, Azure, etc.
