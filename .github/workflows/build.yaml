@@ -2,8 +2,9 @@
 name: build ESXi-7.0 image
 
 on:
-  schedule:
-    - '5 8 * * 0'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   esxi7_bios:
@@ -15,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build image
-        run: ansible-playbook -v -i inventory -e esxi_firmware=bios -e cloud_platform=esxi build.yml
+        run: ansible-playbook -v -i inventory -e esxi_firmware=bios -e cloud_platform=esxi build.yaml
 
       - name: Remove runner
         if: ${{ always() }}
