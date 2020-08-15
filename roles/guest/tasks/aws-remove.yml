@@ -13,3 +13,24 @@
     region: "{{ aws_region }}"
     group_id: "{{ group_id }}"
     state: absent
+
+- name: remove guest_ip from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    state: absent
+
+- name: remove instance_id from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance_id
+    state: absent
+
+- name: remove group_id from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: group_id
+    state: absent

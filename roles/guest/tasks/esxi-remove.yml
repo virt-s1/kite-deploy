@@ -16,3 +16,17 @@
     validate_certs: no
     uuid: "{{ uuid }}"
     state: absent
+
+- name: remove guest_ip from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    state: absent
+
+- name: remove uuid from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: uuid
+    state: absent
