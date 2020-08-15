@@ -9,7 +9,7 @@ firewall --enabled --ssh
 selinux --enforcing
 rootpw --lock --iscrypted $6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
 user --name=admin --groups=wheel --iscrypted --password=$6$1LgwKw9aOoAi/Zy9$Pn3ErY1E8/yEanJ98evqKEW.DZp24HTuqXPJl6GYCm8uuobAmwxLv7rGCvTRZhxtcYdmC0.XnYRSR9Sh6de3p0
-sshkey --username=admin "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC8/I14u/Dtp7nUAK90HdNeMCF1qclpvKJkwUd9Jc27C/IvGuPryLRumt6y3GIUAHXxFRQ2Cd+2fToEwxOm0NCVGO0cpXkLg6l9Fs+6Spjf1W3IrrMGiEtAMYA7DZwNRqFVcmDOZnOpyVRi6yBktHN4cx7mMsu0UY6jufhLGTtfU+iOpD5xnS8lvbRkCDzSDwaqx9/1v0t59YzbYnhdKEaeuMHIN3SwcjbyhRiLBdjfbG8ydVXgu+eiW8FTqOwZkdzNn4P8rg6ekS22S3l/q5j1kJidcy8haajc4pnCRfX3CXWKQIy1XCYHHnXgvnjLlKgLKfPX7U4U9c3M1ULP1h969C8pmr61koxkrzXi8Qc9VvHEP8P8q4cDOpMXaokGTChoT6fEM70ylD4WGnKipH8VnM13V+VVWeYtVjQtF1UJDyPEFpjQREhBDcKT2t50zXkUEhDno2lLm6DSf1q+r7823ItpEYiBRZYjpW9Do4PkvGooFxrO7tttmYkSrD2ByAk= linux-cloud-test"
+sshkey --username=admin "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMiTGemx2gjWkPCApWZHblN34WaD3cIiuv6zU1S4dtSumR3NeCdUnA9fBgDGyKErIbxtI1XICoLCulv7zPQuUNa/H/iv1yyH2o+5ZuQe8sLtX5bO0nfVdBWSWQu0EMgyaHrPnt642Cby91YLjX8AVkfRPczHkE3mRTJpkYmdeYRPZqNe6+o9A4LVa5/ZNEgzQLs2fXAJlQWP24nueRm8ypdHt0HvZa4wsHELaG7AXlcz3pmg+4I256UG2f5Y99k10CqAYteRtILrR3oXary9pDd4tg9/aCS3T7GYZGi8l5CdZ2LZwHf6pLZM/O9Lf4rjDysyfPw7RZ2uwF0SRpDfUrqrufgEHCLtfADfYg0qf/iulGoLaM3OTI+Jbyra2JXP1tlzyOUUDm1dwABRTcQvujSYrdnJM4M4BHo3ca1U8Fkh/KgjVahfIYH0kx+FjT964lJAJfxU0O3nnsytiEghLk1DuHta6VNuTRehF5gbhNC2Cc6yqbSZ+lp68bU4dRDm0= kite-test"
 timezone --utc Asia/Shanghai
 services --enabled="NetworkManager,sshd,rsyslog,chronyd,cloud-init,cloud-init-local"
 reboot --eject
@@ -32,6 +32,14 @@ baseurl={{ repos[os]["appstream"] }}
 enabled=1
 gpgcheck=0
 EOF
+
+# install ltp
+dnf install -y http://file-server-virt-qe-3rd.cloud.paas.psi.redhat.com/ltp-master-20191128.x86_64.rpm
+
+# RHEL change default cloud user to admin
+sed -i 's/name: cloud-user/name: admin/g' /etc/cloud/cloud.cfg
+# RHEL change admin(cloud user) lock_passwd to false
+sed -i 's/lock_passwd: true/lock_passwd: false/g' /etc/cloud/cloud.cfg
 
 true
 

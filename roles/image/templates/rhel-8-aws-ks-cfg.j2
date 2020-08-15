@@ -39,7 +39,7 @@ rootuuid=$( awk '$2=="/" { print $1 };'  /etc/fstab )
 mkdir /boot/grub
 echo -e 'default=0\ntimeout=0\n\n' > /boot/grub/grub.conf
 for kv in $( ls -1v /boot/vmlinuz* |grep -v rescue |sed s/.*vmlinuz-//  ); do
-  echo "title CentOS Stream 8 ($kv)" >> /boot/grub/grub.conf
+  echo "title RHEL 8 ($kv)" >> /boot/grub/grub.conf
   echo -e "\troot (hd0)" >> /boot/grub/grub.conf
   echo -e "\tkernel /boot/vmlinuz-$kv ro root=$rootuuid console=hvc0 LANG=en_US.UTF-8" >> /boot/grub/grub.conf
   echo -e "\tinitrd /boot/initramfs-$kv.img" >> /boot/grub/grub.conf
@@ -106,13 +106,13 @@ EOL
 # make sure firstboot doesn't start
 echo "RUN_FIRSTBOOT=NO" > /etc/sysconfig/firstboot
 
-# centos cloud user
+# RHEL cloud user
 echo -e 'admin\tALL=(ALL)\tNOPASSWD: ALL' >> /etc/sudoers
 sed -i 's/name: cloud-user/name: admin/g' /etc/cloud/cloud.cfg
 
 dnf clean all
 
-# XXX instance type markers - MUST match CentOS Infra expectation
+# XXX instance type markers - MUST match RHEL Infra expectation
 echo 'ec2' > /etc/yum/vars/infra
 
 # change dhcp client retry/timeouts to resolve #6866
@@ -157,6 +157,9 @@ dracut -f /boot/initramfs-$KERNEL_VERSION.img $KERNEL_VERSION
 
 # reorder console entries
 sed -i 's/console=tty0/console=tty0 console=ttyS0,115200n8/' /boot/grub2/grub.cfg
+
+# install ltp
+dnf install -y http://file-server-virt-qe-3rd.cloud.paas.psi.redhat.com/ltp-master-20191128.x86_64.rpm
 
 true
 

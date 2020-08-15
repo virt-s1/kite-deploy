@@ -99,8 +99,8 @@
         uuid: "{{ hw_uuid }}"
       register: facts
       until: facts.instance.ipv4 is not none
-      retries: 30
-      delay: 1
+      retries: 180
+      delay: 10
   rescue:
     - name: poweroff guest
       vmware_guest:
@@ -135,7 +135,7 @@
 
 - name: waits until instance is reachable
   wait_for:
-    host: "{{ new_guest.instance.ipv4 }}"
+    host: "{{ facts.instance.ipv4 }}"
     port: 22
     search_regex: OpenSSH
     delay: 10
