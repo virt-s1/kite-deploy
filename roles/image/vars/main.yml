@@ -13,4 +13,5 @@ checksum_sha256:
 
 image_type:
   aws: qcow2
+  openstack: qcow2
   azure: vhd

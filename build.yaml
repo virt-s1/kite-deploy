@@ -11,7 +11,8 @@
         target: openstack
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
-        - cloud_platform == "aws" or cloud_platform == "azure"
+        - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
+
 
 - hosts: builder
 
@@ -23,7 +24,7 @@
         target: openstack
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
-        - cloud_platform == "aws" or cloud_platform == "azure"
+        - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
 
 - hosts: openstack
   gather_facts: no
@@ -36,7 +37,7 @@
         action: clean
         target: openstack
       when:
-        - cloud_platform == "aws" or cloud_platform == "azure"
+        - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
 
 - hosts: aws
   gather_facts: yes
@@ -51,6 +52,20 @@
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws"
+
+- hosts: openstack
+  gather_facts: yes
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: upload
+        target: "{{ cloud_platform }}"
+        os: "{{ lookup('env', 'TEST_OS') }}"
+      when:
+        - cloud_platform == "openstack"
 
 - hosts: esxi
   gather_facts: no
