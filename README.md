@@ -3,7 +3,7 @@
 ![RHEL 8.3 AWS EC2 AMI](https://github.com/virt-s1/kite-deploy/workflows/RHEL%208.3%20AWS%20EC2%20AMI/badge.svg)
 ![RHEL 8.3 ESXi-7.0 image](https://github.com/virt-s1/kite-deploy/workflows/RHEL%208.3%20ESXi-7.0%20image/badge.svg)
 
-kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, Azure, etc.
+kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, OpenStck, Azure, etc.
 
 kite-deploy will provide an easy way to setup Linux guest/instance/VM, build and maintain Linux image on public and private cloud platform.
 
@@ -24,6 +24,10 @@ kite-deploy includes two roles to have different jobs done. You can group them t
 
     ansible-playbook -v -i inventory -e esxi_firmware=<bios or efi> -e cloud_platform=esxi deploy.yaml
 
+### deploy OpenStack instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=openstack deploy.yaml
+
 ## remove instance/VM on cloud
 
 ### remove AWS EC2 instance
@@ -33,6 +37,10 @@ kite-deploy includes two roles to have different jobs done. You can group them t
 ### remove VMWare ESXi VM
 
     ansible-playbook -v -i inventory -e cloud_platform=esxi remove.yaml
+
+### remove OpenStack instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=openstack remove.yaml
 
 ## kite-deploy Image
 
@@ -44,6 +52,7 @@ kite-deploy will build/update images for different cloud platforms weekly.
 | ---- | ---- |
 | VMWare ESXi 7.0 / RHEL 8.3 | vSphere template `template-rhel-8-3-bios` and `template-rhel-8-3-efi` |
 | AWS EC2 AMI / RHEL 8.3 | Region `US East (N. Virginia)` AMI ID is stored in Amazon Simple Systems Manager parameter with parameter name `kite_imagebuild_rhel-8-3` |
+| Openstack / RHEL 8.3 | OpenStack qcow2 image ` kite-openstack-rhel-8-3 ` |
 
 Image building [kickstart files](https://github.com/henrywang/lctp/tree/master/roles/image/templates) are for [LTP](https://github.com/linux-test-project/ltp) test running. If you need more packages according to your test, feel free to send PR to [kickstart files](https://github.com/henrywang/lctp/tree/master/roles/image/templates).
 
@@ -56,6 +65,10 @@ Build ESXi image with:
 Build AWS EC2 AMI image with:
 
     ansible-playbook -v -i inventory -e cloud_platform=aws build.yaml
+
+Build Openstack qcow2 image with:
+
+    ansible-playbook -v -i inventory -e cloud_platform=openstack build.yaml
 
 ## kite-deploy configuration
 
