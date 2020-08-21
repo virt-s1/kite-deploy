@@ -1,0 +1,20 @@
+---
+- name: remove openstack instance
+  os_server:
+    cloud: psi-openstack
+    name: "{{ instance_name }}"
+    state: absent
+
+- name: remove guest_ip from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    state: absent
+
+- name: remove uuid from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance_name
+    state: absent

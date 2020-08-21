@@ -1,0 +1,99 @@
+---
+- name: create openstack configuration folder
+  file:
+    path: ~/.config/openstack
+    state: directory
+
+- name: set vault password file
+  copy:
+    content: "{{ lookup('env', 'VAULT_PASSWORD') }}"
+    dest: "~/.config/ansible-vault"
+
+- name: random number for unique instance tag
+  set_fact:
+    tmp_num: "{{ 999 | random(start=101) }}"
+
+- name: save clouds.yaml to ~/.config/openstack
+  command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ playbook_dir }}/roles/image/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
+
+- name: create a new openstack keypair
+  os_keypair:
+    cloud: psi-openstack
+    state: present
+    name: kite-guest-key
+    public_key_file: "{{ playbook_dir }}/key/identity.pub"
+
+- name: create security group
+  os_security_group:
+    cloud: psi-openstack
+    name: kite-guest
+    state: present
+    description: security group for kite image build server
+
+- name: set ssh rule for security group kite
+  os_security_group_rule:
+    cloud: psi-openstack
+    security_group: kite-guest
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: set openstack instance name
+  set_fact:
+    instance_name: "kite-guest-{{ os }}-{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+
+- name: deploy instance
+  os_server:
+    cloud: psi-openstack
+    name: "{{ instance_name }}"
+    image: kite-openstack-{{ os }}
+    flavor: "{{ flavor }}"
+    network: "{{ network }}"
+    key_name: kite-guest-key
+    security_groups: kite-guest
+    auto_ip: yes
+    wait: yes
+    timeout: 600
+  register: instance_result
+
+- name: waits until instance is reachable
+  wait_for:
+    host: "{{ instance_result.openstack.public_v4 }}"
+    port: 22
+    search_regex: OpenSSH
+    delay: 10
+
+- name: write guest ip info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    value: "{{ instance_result.openstack.public_v4 }}"
+    no_extra_spaces: yes
+
+- name: write instance name info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance_name
+    value: "{{ instance_name }}"
+    no_extra_spaces: yes
+
+- name: add os instance ip into host group builder
+  add_host:
+    name: "{{ instance_result.openstack.public_v4 }}"
+    groups: guest
+
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ instance_result.openstack.public_v4 }}"
