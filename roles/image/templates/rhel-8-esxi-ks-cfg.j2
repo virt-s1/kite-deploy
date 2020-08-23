@@ -19,6 +19,12 @@ clearpart --all --initlabel
 autopart
 
 %post --log=/var/log/anaconda/post-install.log --erroronfail
+
+# set environment variable to mark cloud platform
+cat > /etc/profile.d/platform.sh << EOF
+export PLATFORM="esxi"
+EOF
+
 cat <<EOF > /etc/yum.repos.d/nightly.repo
 [RHEL-8-NIGHTLY-BaseOS]
 name=baseos

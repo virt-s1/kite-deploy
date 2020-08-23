@@ -158,6 +158,11 @@ dracut -f /boot/initramfs-$KERNEL_VERSION.img $KERNEL_VERSION
 # reorder console entries
 sed -i 's/console=tty0/console=tty0 console=ttyS0,115200n8/' /boot/grub2/grub.cfg
 
+# set environment variable to mark cloud platform
+cat > /etc/profile.d/platform.sh << EOF
+export PLATFORM="aws"
+EOF
+
 # install ltp
 dnf install -y http://file-server-virt-qe-3rd.cloud.paas.psi.redhat.com/ltp-master-20191128.x86_64.rpm
 
