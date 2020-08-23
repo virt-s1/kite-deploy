@@ -7,7 +7,7 @@ on:
     - cron: '25 8 * * 0'
 
 jobs:
-  aws_ec2_ami:
+  openstack_qcow2:
     name: build rhel 8.3 openstack image
     runs-on: kite-runner
 
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout kite-deploy repository
         uses: actions/checkout@v2
 
-      - name: Build AMI
+      - name: Build OpenStack image
         run: ansible-playbook -v -i inventory -e cloud_platform=openstack build.yaml
 
       - name: Remove runner
