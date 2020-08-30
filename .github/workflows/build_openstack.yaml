@@ -3,8 +3,8 @@ name: RHEL 8.3 OpenStack image
 
 on:
   schedule:
-    # At 8:25 every Sunday
-    - cron: '25 8 * * 0'
+    # At 4:25 every Wed
+    - cron: '25 4 * * 4'
 
 jobs:
   openstack_qcow2:

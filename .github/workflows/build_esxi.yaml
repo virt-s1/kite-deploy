@@ -3,8 +3,8 @@ name: RHEL 8.3 ESXi-7.0 image
 
 on:
   schedule:
-    # At 8:05 every Sunday
-    - cron: '5 8 * * 0'
+    # At 4:05 every Wed
+    - cron: '5 4 * * 4'
 
 jobs:
   esxi7_bios:

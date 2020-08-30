@@ -3,8 +3,8 @@ name: RHEL 8.3 AWS EC2 AMI
 
 on:
   schedule:
-    # At 8:15 every Sunday
-    - cron: '15 8 * * 0'
+    # At 4:15 every Wed
+    - cron: '15 4 * * 4'
 
 jobs:
   aws_ec2_ami:
