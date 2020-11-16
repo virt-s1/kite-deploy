@@ -136,8 +136,11 @@
       volume_type: gp2
       delete_on_termination: true
     user_data: |
-      #!/bin/bash
-      dnf -y install python3-dnf python3 qemu-img
+      #cloud-config
+      packages:
+        - python3
+        - python3-dnf
+        - qemu-img
     instance_tags:
       kite: "kite.imagebuild.{{ os }}"
     wait: yes
