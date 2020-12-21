@@ -77,6 +77,7 @@ You can set these environment variables to configure to run kite-deploy
 
     TEST_OS           The OS to run the tests in.  Currently supported values:
                           "rhel-8-3"
+                          "rhel-8-4"
 
     GITHUB_SHA        The commit SHA that triggered the workflow
                       Used by VM name or instance tag

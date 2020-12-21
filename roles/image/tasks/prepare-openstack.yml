@@ -53,7 +53,7 @@
   os_server:
     cloud: psi-openstack
     name: "{{ instance_name }}"
-    image: "{{ images['fedora-32'] }}"
+    image: "{{ images['fedora-33'] }}"
     flavor: "{{ flavor }}"
     network: "{{ network }}"
     key_name: kite-image-key
