@@ -1,0 +1,22 @@
+pipeline {
+    agent {
+        node {
+            label 'container-fedora-33-prod'
+        }
+    }
+    stages {
+         stage("build aws ec2 rhel image") {
+             steps {
+                 withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_KEY'), string(credentialsId: 'ansible-vault-password', variable: 'VAULT_PASSWORD')]) {
+                     sh label: 'build image', script: """
+                         ansible-playbook -v -i inventory -e cloud_platform=aws build.yaml
+                     """
+                 }
+             }
+         }
+    }
+    options {
+        timestamps()
+        timeout(time: 3, unit: 'HOURS')
+    }
+}
