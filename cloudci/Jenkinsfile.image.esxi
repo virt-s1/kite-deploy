@@ -1,0 +1,31 @@
+pipeline {
+    agent {
+        node {
+            label 'container-fedora-33-prod'
+        }
+    }
+    stages {
+         stage("build esxi rhel bios image") {
+             steps {
+                 withCredentials([usernamePassword(credentialsId: 'vsphere-service-account', passwordVariable: 'VSPHERE_PASSWORD', usernameVariable: 'VSPHERE_USERNAME')]) {
+                     sh label: 'run lctp to build vmdk image', script: """
+                         ansible-playbook -v -i inventory -e esxi_firmware=bios -e cloud_platform=esxi build.yaml
+                     """
+                 }
+             }
+         }
+         stage("build esxi rhel efi image") {
+             steps {
+                 withCredentials([usernamePassword(credentialsId: 'vsphere-service-account', passwordVariable: 'VSPHERE_PASSWORD', usernameVariable: 'VSPHERE_USERNAME')]) {
+                     sh label: 'run lctp to build vmdk image', script: """
+                         ansible-playbook -v -i inventory -e esxi_firmware=efi -e cloud_platform=esxi build.yaml
+                     """
+                 }
+             }
+         }
+    }
+    options {
+        timestamps()
+        timeout(time: 4, unit: 'HOURS')
+    }
+}

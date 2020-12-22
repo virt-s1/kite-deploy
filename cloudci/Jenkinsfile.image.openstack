@@ -1,0 +1,22 @@
+pipeline {
+    agent {
+        node {
+            label 'container-fedora-33-prod'
+        }
+    }
+    stages {
+         stage("build openstack rhel image") {
+             steps {
+                 withCredentials([string(credentialsId: 'ansible-vault-password', variable: 'VAULT_PASSWORD')]) {
+                     sh label: 'build image', script: """
+                         ansible-playbook -v -i inventory -e cloud_platform=openstack build.yaml
+                     """
+                 }
+             }
+         }
+    }
+    options {
+        timestamps()
+        timeout(time: 3, unit: 'HOURS')
+    }
+}
