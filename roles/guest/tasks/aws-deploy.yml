@@ -23,6 +23,11 @@
   set_fact:
     random_instance_type: "{{ lookup('env', 'AWS_INSTANCE_TYPE') | default(instance_type[instance_type_index], true) }}"
 
+- name: save random instance type to a file for umb
+  copy:
+    content: "{{ random_instance_type }}"
+    dest: "aws_instance_type"
+
 - name: get all availability zones
   aws_az_info:
     profile: "{{ aws_profile }}"
