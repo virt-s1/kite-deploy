@@ -6,6 +6,7 @@
     instance_ids: "{{ instance_id }}"
     state: absent
     wait: yes
+  ignore_errors: yes
 
 - name: delete security group
   ec2_group:
@@ -13,6 +14,7 @@
     region: "{{ aws_region }}"
     group_id: "{{ group_id }}"
     state: absent
+  ignore_errors: yes
 
 - name: remove guest_ip from inventory file
   ini_file:
@@ -20,6 +22,7 @@
     section: cloud:vars
     option: guest_ip
     state: absent
+  ignore_errors: yes
 
 - name: remove instance_id from inventory file
   ini_file:
@@ -27,6 +30,7 @@
     section: cloud:vars
     option: instance_id
     state: absent
+  ignore_errors: yes
 
 - name: remove group_id from inventory file
   ini_file:
@@ -34,3 +38,4 @@
     section: cloud:vars
     option: group_id
     state: absent
+  ignore_errors: yes

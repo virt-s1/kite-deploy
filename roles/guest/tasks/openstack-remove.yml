@@ -4,6 +4,7 @@
     cloud: psi-openstack
     name: "{{ instance_name }}"
     state: absent
+  ignore_errors: yes
 
 - name: remove guest_ip from inventory file
   ini_file:
@@ -11,6 +12,7 @@
     section: cloud:vars
     option: guest_ip
     state: absent
+  ignore_errors: yes
 
 - name: remove uuid from inventory file
   ini_file:
@@ -18,3 +20,4 @@
     section: cloud:vars
     option: instance_name
     state: absent
+  ignore_errors: yes
