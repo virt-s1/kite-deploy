@@ -47,9 +47,12 @@ kite-deploy will build/update images for different cloud platforms weekly.
 
 | Cloud Platform / Linux Distro | Image Info |
 | ---- | ---- |
-| VMWare ESXi 7.0 / RHEL 8.3 | vSphere template `template-rhel-8-3-bios` and `template-rhel-8-3-efi` |
-| AWS EC2 AMI / RHEL 8.3 | Region `US East (N. Virginia)` AMI ID is stored in Amazon Simple Systems Manager parameter with parameter name `kite_imagebuild_rhel-8-3` |
-| Openstack / RHEL 8.3 | OpenStack qcow2 image ` kite-openstack-rhel-8-3 ` |
+| VMWare ESXi 7.0 / RHEL 8.3.1 | vSphere template `template-rhel-8-3-bios` and `template-rhel-8-3-efi` |
+| VMWare ESXi 7.0 / RHEL 8.4.0 | vSphere template `template-rhel-8-4-bios` and `template-rhel-8-4-efi` |
+| AWS EC2 AMI / RHEL 8.3.1 | Region `US East (N. Virginia)` AMI ID is stored in Amazon Simple Systems Manager parameter with parameter name `kite_imagebuild_rhel-8-3` |
+| AWS EC2 AMI / RHEL 8.4.0 | Region `US East (N. Virginia)` AMI ID is stored in Amazon Simple Systems Manager parameter with parameter name `kite_imagebuild_rhel-8-4` |
+| Openstack / RHEL 8.3.1 | OpenStack qcow2 image ` kite-openstack-rhel-8-3 ` |
+| Openstack / RHEL 8.4.0 | OpenStack qcow2 image ` kite-openstack-rhel-8-4 ` |
 
 Image building [kickstart files](https://github.com/henrywang/lctp/tree/master/roles/image/templates) are for [LTP](https://github.com/linux-test-project/ltp) test running. If you need more packages according to your test, feel free to send PR to [kickstart files](https://github.com/henrywang/lctp/tree/master/roles/image/templates).
 
