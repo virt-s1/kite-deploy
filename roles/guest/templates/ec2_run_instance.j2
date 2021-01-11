@@ -1,6 +1,6 @@
 #!/bin/bash
 
-aws --profile={{ aws_profile }} --region={{ aws_region }} ec2 run-instances \
+/usr/local/bin/aws --profile={{ aws_profile }} --region={{ aws_region }} ec2 run-instances \
     --associate-public-ip-address \
     --block-device-mappings DeviceName=/dev/xvda,Ebs=\{DeleteOnTermination=true,VolumeSize=12,VolumeType=gp2,Encrypted=false\} \
 {% if random_instance_type.startswith('t3') %}
