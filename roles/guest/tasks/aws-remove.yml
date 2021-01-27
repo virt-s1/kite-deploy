@@ -8,6 +8,17 @@
     wait: yes
   ignore_errors: yes
 
+# security group can be deleted only when instance state is at terminated
+# and can't be deleted if instance state is at shutting-down
+- name: wait until instance terminated
+  ec2_instance_info:
+    instance_ids:
+      - "{{ instance_id }}"
+  register: result_instance_status
+  retries: 30
+  delay: 10
+  until: result_instance_status.instances[0].state.name == "terminated"
+
 - name: delete security group
   ec2_group:
     profile: "{{ aws_profile }}"

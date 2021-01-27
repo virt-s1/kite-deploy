@@ -4,7 +4,14 @@ aws_region: "{{ lookup('env', 'AWS_REGION') }}"
 aws_profile: "default"
 
 # fedora 33 gp2 hvm ami id
-fedora_east_1_gp2_ami: ami-01efb339f953fdf36
+fedora_ami:
+  x86_64: ami-01efb339f953fdf36
+  aarch64: ami-07b7fa952a4ad5fd2
+
+# instance type to build/convert ami
+builder_instance_type:
+  x86_64: t2.medium
+  aarch64: t4g.xlarge
 
 # instance type covered by test
 instance_type:

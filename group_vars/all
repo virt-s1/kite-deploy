@@ -1,0 +1,3 @@
+---
+# x86_64 for default arch
+arch: "{{ lookup('env', 'ARCH') | default('x86_64', true) }}"

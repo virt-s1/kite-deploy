@@ -10,6 +10,9 @@ localhost
 [openstack]
 localhost
 
+[beaker]
+localhost
+
 [guest]
 
 [builder]
@@ -21,6 +24,7 @@ esxi
 aws
 azure
 openstack
+beaker
 
 [cloud:vars]
 ansible_connection=local

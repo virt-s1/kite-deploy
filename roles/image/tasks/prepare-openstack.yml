@@ -82,3 +82,11 @@
   file:
     path: "{{ playbook_dir }}/key/identity"
     mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ instance_result.openstack.public_v4 }}"

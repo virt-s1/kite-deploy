@@ -12,7 +12,22 @@
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
+        - arch == "x86_64"
 
+- hosts: beaker
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: prepare
+        target: beaker
+        os: "{{ lookup('env', 'TEST_OS') }}"
+      when:
+        - cloud_platform == "aws"
+        - arch == "aarch64"
 
 - hosts: builder
 
@@ -21,7 +36,7 @@
         name: image
       vars:
         action: create
-        target: openstack
+        target: qcow2
         os: "{{ lookup('env', 'TEST_OS') }}"
       when:
         - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
@@ -38,6 +53,21 @@
         target: openstack
       when:
         - cloud_platform == "aws" or cloud_platform == "azure" or cloud_platform == "openstack"
+        - arch == "x86_64"
+
+- hosts: beaker
+  gather_facts: no
+  become: no
+
+  tasks:
+    - include_role:
+        name: image
+      vars:
+        action: clean
+        target: beaker
+      when:
+        - cloud_platform == "aws"
+        - arch == "aarch64"
 
 - hosts: aws
   gather_facts: yes

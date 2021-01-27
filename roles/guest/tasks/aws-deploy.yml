@@ -41,10 +41,10 @@
   ec2_vpc_net:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "kite.guest.{{ os }}"
+    name: "kite.guest"
     cidr_block: "172.32.0.0/16"
     tags:
-      kite: "kite.guest.{{ os }}"
+      kite: "kite.guest"
   register: ec2_vpc
 
 - debug:
@@ -56,7 +56,7 @@
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
     tags:
-      kite: "kite.guest.{{ os }}"
+      kite: "kite.guest"
   register: ec2_vpc_igw
 
 - debug:
@@ -70,7 +70,7 @@
     cidr: "172.32.32.0/24"
     az: "{{ ec2_zones.availability_zones[-2].zone_name }}"
     tags:
-      kite: "kite.guest.{{ os }}"
+      kite: "kite.guest"
   register: ec2_vpc_subnet
 
 - debug:
@@ -87,7 +87,7 @@
       - dest: 0.0.0.0/0
         gateway_id: "{{ ec2_vpc_igw.gateway_id }}"
     tags:
-      kite: "kite.guest.{{ os }}"
+      kite: "kite.guest"
   register: ec2_vpc_route_table
 
 - debug:
@@ -106,14 +106,14 @@
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
-    name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+    name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
     description: kite security group
     rules:
       - proto: all
         cidr_ip: "{{ result_ip.json.ip }}/32"
     tags:
-      kite: "kite.guest.{{ os }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
-      name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+      kite: "kite.guest.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+      name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
   register: ec2_security_group
 
 - debug:
@@ -123,16 +123,16 @@
   ec2_key:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    name: "kite.guest.{{ os }}"
+    name: "kite.guest.{{ os }}.{{ arch }}"
     key_material: "{{ lookup('file', 'key/identity.pub')  }}"
 
 - name: set ami id key
   set_fact:
-    ami_id_key: "kite_imagebuild_{{ os }}"
+    ami_id_key: "kite_imagebuild_{{ os }}_{{ arch }}"
 
 - name: set tag name
   set_fact:
-    instance_tag: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+    instance_tag: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
 
 - name: generate ec2_run_instance script
   template:
@@ -169,6 +169,8 @@
     port: 22
     search_regex: OpenSSH
     delay: 10
+    sleep: 5
+    timeout: 600
 
 - name: add guest ip into host guest group
   add_host:

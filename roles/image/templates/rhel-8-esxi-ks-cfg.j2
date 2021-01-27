@@ -1,9 +1,9 @@
-url --url {{ repos[os]["baseos"] }}
+url --url {{ repos[os][arch]["baseos"] }}
 text
 lang en_US.UTF-8
 keyboard --vckeymap=us --xlayouts='us'
-repo --name="BaseOS" --baseurl={{ repos[os]["baseos"] }} --cost=100
-repo --name="AppStream" --baseurl={{ repos[os]["appstream"] }} --cost=100
+repo --name="BaseOS" --baseurl={{ repos[os][arch]["baseos"] }} --cost=100
+repo --name="AppStream" --baseurl={{ repos[os][arch]["appstream"] }} --cost=100
 network  --bootproto=dhcp --device=link --activate --onboot=on
 firewall --enabled --ssh
 selinux --enforcing
@@ -28,19 +28,22 @@ EOF
 cat <<EOF > /etc/yum.repos.d/nightly.repo
 [RHEL-8-NIGHTLY-BaseOS]
 name=baseos
-baseurl={{ repos[os]["baseos"] }}
+baseurl={{ repos[os][arch]["baseos"] }}
 enabled=1
 gpgcheck=0
 
 [RHEL-8-NIGHTLY-AppStream]
 name=appstream
-baseurl={{ repos[os]["appstream"] }}
+baseurl={{ repos[os][arch]["appstream"] }}
 enabled=1
 gpgcheck=0
 EOF
 
-# install ltp
-dnf install -y http://file-server-virt-qe-3rd.cloud.paas.psi.redhat.com/ltp-master-20191128.x86_64.rpm
+# Build and install ltp
+wget https://github.com/linux-test-project/ltp/archive/20210121.tar.gz
+tar -zxf 20210121.tar.gz
+cd ltp-20210121 && autoreconf -i && ./configure && make all && make install
+cd .. && rm -f 20210121.tar.gz && rm -rf ltp-20210121
 
 # RHEL change default cloud user to admin
 sed -i 's/name: cloud-user/name: admin/g' /etc/cloud/cloud.cfg

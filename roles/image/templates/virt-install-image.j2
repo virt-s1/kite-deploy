@@ -16,12 +16,16 @@ connect="--connect=qemu:///session"
 name=$(basename $1)-builder
 
 cleanup_builder_vm () {
-  if virsh $connect list --state-running --name | grep -q $name; then
-      virsh $connect destroy $name
-  fi
-  if virsh $connect list --all --name | grep -q $name; then
-      virsh $connect undefine $name
-  fi
+    if virsh $connect list --state-running --name | grep -q $name; then
+        virsh $connect destroy $name
+    fi
+    if virsh $connect list --all --name | grep -q $name; then
+{% if arch == "aarch64" %}
+        virsh $connect undefine $name --nvram
+{% else %}
+        virsh $connect undefine $name
+{% endif %}
+    fi
 }
 
 supervised_virt_install () {
@@ -48,6 +52,9 @@ supervised_virt_install $connect \
                         --initrd-inject=$ks \
                         --extra-args="ks=file:/$ks console=ttyS0,115200" \
                         --name=$name \
+{% if arch == "aarch64" %}
+                        --boot uefi \
+{% endif %}
                         --disk "path=$out,format=qcow2" \
                         --ram 4096 \
                         --vcpus=1 \
@@ -56,7 +63,5 @@ supervised_virt_install $connect \
                         --location="$url" \
                         --nographics \
                         --noreboot
-
-rm $ks
 
 cleanup_builder_vm
