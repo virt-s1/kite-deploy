@@ -10,21 +10,13 @@ localhost
 [openstack]
 localhost
 
-[beaker]
-localhost
-
 [guest]
-
-[builder]
-
-[dder]
 
 [cloud:children]
 esxi
 aws
 azure
 openstack
-beaker
 
 [cloud:vars]
 ansible_connection=local
@@ -33,16 +25,6 @@ ansible_connection=local
 ansible_user=admin
 ansible_private_key_file="{{ playbook_dir }}/key/identity"
 ansible_become_password="foobar"
-ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-[builder:vars]
-ansible_user=fedora
-ansible_private_key_file="{{ playbook_dir }}/key/identity"
-ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-[dder:vars]
-ansible_user=fedora
-ansible_private_key_file="{{ playbook_dir }}/key/identity"
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 [all:vars]

@@ -177,6 +177,19 @@
     name: "{{ public_ip  }}"
     groups: guest
 
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ public_ip }}"
+
 - name: write guest info to inventory file
   ini_file:
     path: "{{ playbook_dir }}/inventory"
@@ -200,16 +213,3 @@
     option: group_id
     value: "{{ instance_json.Instances[0].SecurityGroups[0].GroupId }}"
     no_extra_spaces: yes
-
-- name: keep private key permission to 600
-  file:
-    path: "{{ playbook_dir }}/key/identity"
-    mode: "0600"
-
-- name: ensure cloud-init has finished
-  raw: test -f /var/lib/cloud/instance/boot-finished
-  retries: 60
-  register: cloud_init_check
-  changed_when: false
-  until: cloud_init_check is success
-  delegate_to: "{{ public_ip }}"

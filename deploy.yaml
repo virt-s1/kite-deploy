@@ -2,12 +2,5 @@
 - hosts: "{{ cloud_platform }}"
   gather_facts: no
   become: no
-  vars:
-    project: kite
-
   tasks:
-    - include_role:
-        name: guest
-      vars:
-        action: deploy
-        os: "{{ lookup('env', 'TEST_OS') }}"
+    - include_tasks: "tasks/{{ cloud_platform }}-deploy.yml"

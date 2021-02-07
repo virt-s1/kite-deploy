@@ -1,14 +1,2 @@
-*.zip
-/kernel
-tmp/
-/output
-/results
-*.result
-*.report
-*.crt
-*.key
-*.private
-ks.cfg
-*.iso
-*.qcow2
-*.ks
+aws_instance_type
+ec2_run_instance.sh

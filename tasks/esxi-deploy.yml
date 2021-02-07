@@ -11,7 +11,7 @@
     validate_certs: no
     datacenter: "{{ esxi_datacenter }}"
     esxi_hostname: "{{ esxi_host }}"
-    name: "{{ project }}-{{ esxi_firmware }}-{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+    name: "{{ project }}-{{ os }}-{{ esxi_firmware }}-{{ lookup('env', 'PIPELINE_ID') | default(tmp_num, true) }}"
     folder: ""
     state: poweredon
     template: "{{ esxi_template }}"
@@ -99,25 +99,23 @@
     delay: 10
     timeout: 1800
 
-- name: guest smoking test
-  vmware_vm_shell:
-    hostname: "{{ vsphere_server }}"
-    username: "{{ vsphere_username }}"
-    password: "{{ vsphere_password }}"
-    validate_certs: no
-    vm_id: "{{ hw_uuid }}"
-    vm_id_type: uuid
-    vm_username: "{{ esxi_guest_username }}"
-    vm_password: "{{ esxi_guest_password }}"
-    vm_shell: /usr/bin/cat
-    vm_shell_args: /etc/redhat-release
-    wait_for_process: yes
-  register: shell_command_output
-  failed_when: shell_command_output.exit_code != 0
+- name: add instance to guest group
+  add_host:
+    name: "{{ new_guest.instance.ipv4 }}"
+    group: guest
 
-- name: show command result
-  debug:
-    var: shell_command_output
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ new_guest.instance.ipv4 }}"
 
 - name: create a snapshot
   vmware_guest_snapshot:
@@ -129,7 +127,7 @@
     uuid: "{{ hw_uuid }}"
     state: present
     snapshot_name: "{{ esxi_snapshot_name }}"
-    description: "snapshot for running {{ project }} test"
+    description: "snapshot for {{ project }} {{ os }} {{ esxi_firmware }}"
 
 - name: write guest info to inventory file
   ini_file:
