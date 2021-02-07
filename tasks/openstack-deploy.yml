@@ -14,7 +14,7 @@
     tmp_num: "{{ 999 | random(start=101) }}"
 
 - name: save clouds.yaml to ~/.config/openstack
-  command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ playbook_dir }}/roles/image/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
+  command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ playbook_dir }}/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
 
 - name: create a new openstack keypair
   os_keypair:
