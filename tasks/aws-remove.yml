@@ -19,13 +19,14 @@
   delay: 10
   until: result_instance_status.instances[0].state.name == "terminated"
 
-- name: delete security group
-  ec2_group:
-    profile: "{{ aws_profile }}"
-    region: "{{ aws_region }}"
-    group_id: "{{ group_id }}"
-    state: absent
-  ignore_errors: yes
+# # Security group is for common use already, don't need delete it everytime
+# - name: delete security group
+#   ec2_group:
+#     profile: "{{ aws_profile }}"
+#     region: "{{ aws_region }}"
+#     group_id: "{{ group_id }}"
+#     state: absent
+#   ignore_errors: yes
 
 - name: remove guest_ip from inventory file
   ini_file:
@@ -43,10 +44,11 @@
     state: absent
   ignore_errors: yes
 
-- name: remove group_id from inventory file
-  ini_file:
-    path: "{{ playbook_dir }}/inventory"
-    section: cloud:vars
-    option: group_id
-    state: absent
-  ignore_errors: yes
+# # No group_id added in aws-deploy.yml
+# - name: remove group_id from inventory file
+#   ini_file:
+#     path: "{{ playbook_dir }}/inventory"
+#     section: cloud:vars
+#     option: group_id
+#     state: absent
+#   ignore_errors: yes

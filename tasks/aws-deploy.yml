@@ -93,27 +93,32 @@
 - debug:
     var: ec2_vpc_route_table
 
-- name: get localhost public ip address
-  uri:
-    url: https://api.ipify.org?format=json
-  register: result_ip
+# # Do not use ipify.org to get public IP because it's not stable
+# - name: get localhost public ip address
+#   uri:
+#     url: https://api.ipify.org?format=json
+#   register: result_ip
 
-- debug:
-    var: result_ip
+# - debug:
+#     var: result_ip
 
 - name: create security group
   ec2_group:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
-    name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+    name: "kite.guest"
     description: kite security group
     rules:
-      - proto: all
-        cidr_ip: "{{ result_ip.json.ip }}/32"
+      - proto: tcp
+        ports:
+          - 22
+        cidr_ip: 0.0.0.0/0
+      # - proto: all
+      #   cidr_ip: "{{ result_ip.json.ip }}/32"
     tags:
-      kite: "kite.guest.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
-      name: "kite.guest.{{ random_instance_type }}.{{ os }}.{{ arch }}.{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
+      kite: "kite.guest"
+      name: "kite.guest"
   register: ec2_security_group
 
 - debug:
@@ -206,10 +211,11 @@
     value: "{{ instance_json.Instances[0].InstanceId }}"
     no_extra_spaces: yes
 
-- name: write guest info to inventory file
-  ini_file:
-    path: "{{ playbook_dir }}/inventory"
-    section: cloud:vars
-    option: group_id
-    value: "{{ instance_json.Instances[0].SecurityGroups[0].GroupId }}"
-    no_extra_spaces: yes
+# # Do not delete security group, so don't need group id any more
+# - name: write guest info to inventory file
+#   ini_file:
+#     path: "{{ playbook_dir }}/inventory"
+#     section: cloud:vars
+#     option: group_id
+#     value: "{{ instance_json.Instances[0].SecurityGroups[0].GroupId }}"
+#     no_extra_spaces: yes
