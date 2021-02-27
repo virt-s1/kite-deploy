@@ -1,0 +1,19 @@
+---
+- name: "delete gcp instance {{ instance_name }}"
+  command: /usr/bin/gcloud compute instances delete {{ instance_name }} --zone=us-central1-a --delete-disks=all --project={{ gcp_project }}
+
+- name: remove guest_ip from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    state: absent
+  ignore_errors: yes
+
+- name: remove instance_name from inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance_name
+    state: absent
+  ignore_errors: yes

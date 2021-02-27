@@ -4,6 +4,9 @@ localhost
 [aws]
 localhost
 
+[gcp]
+localhost
+
 [azure]
 localhost
 
@@ -15,6 +18,7 @@ localhost
 [cloud:children]
 esxi
 aws
+gcp
 azure
 openstack
 

@@ -1,0 +1,91 @@
+---
+- name: gcloud/gsutil - authorizing with a service account
+  command: /usr/bin/gcloud auth activate-service-account --key-file={{ gcp_service_account_file }}
+
+- name: random number for unique instance name
+  set_fact:
+    tmp_num: "{{ 999 | random(start=101) }}"
+
+- name: random number for instance type
+  set_fact:
+    instance_type_index: "{{ 4 | random(start=0) }}"
+
+- name: set random instance type
+  set_fact:
+    random_instance_type: "{{ lookup('env', 'GCP_INSTANCE_TYPE') | default(instance_type[instance_type_index], true) }}"
+
+- name: save random instance type to a file for umb
+  copy:
+    content: "{{ random_instance_type }}"
+    dest: "gcp_instance_type"
+
+- set_fact:
+    instance_name: "kite-guest-{{ os }}-{{ arch | replace('_', '-') }}-{{ tmp_num }}"
+
+# rhel-8-2 and above support GVNIC on all types of instances
+- set_fact:
+    instance_create_args: "--network-interface=nic-type=GVNIC"
+
+# SEV feature is only supported by n2d instance
+- set_fact:
+    instance_create_args: "--confidential-compute --network-interface=nic-type=GVNIC"
+  when: random_instance_type == "n2d-standard-2"
+
+# Both SEV and GVNIC are not supported by rhel-8-0 and rhel-8-1
+- set_fact:
+    instance_create_args: ""
+  when: os == "rhel-8-0" or os == "rhel-8-1"
+
+- set_fact:
+    image_name: "kite-image-{{ os }}-{{ arch | replace('_', '-') }}"
+
+- name: create features enabled instance
+  command: /usr/bin/gcloud compute instances create {{ instance_name }} --zone=us-central1-a --machine-type=n2d-standard-2 --boot-disk-auto-delete --boot-disk-size=20GB --boot-disk-type=pd-ssd --labels=kite=kite-guest-{{ os }}-{{ arch }}-{{ tmp_num }} --metadata-from-file=ssh-keys=key/gcp-ssh-key --metadata=block-project-ssh-keys=TRUE --preemptible --image={{ image_name }} --service-account={{ gcp_service_account_name }} {{ instance_create_args }} --project={{ gcp_project }} --format=json
+  register: result_instance
+
+- debug:
+    var: result_instance
+
+- set_fact:
+    instance_ip: "{{ result_instance.stdout | from_json | json_query('[0].networkInterfaces[0].accessConfigs[0].natIP') }}"
+
+- name: waits until ssh is reachable
+  wait_for:
+    host: "{{ instance_ip }}"
+    port: 22
+    search_regex: OpenSSH
+    delay: 10
+
+- name: add instance to guest group
+  add_host:
+    name: "{{ instance_ip }}"
+    group: guest
+
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ instance_ip }}"
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    value: "{{ instance_ip }}"
+    no_extra_spaces: yes
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance_name
+    value: "{{ instance_name }}"
+    no_extra_spaces: yes

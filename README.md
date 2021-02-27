@@ -1,14 +1,10 @@
 # kite-deploy
 
-kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as AWS EC2, VMWare ESXi, OpenStck, Azure, etc.
+kite-deploy is one of sub-projects of kite, which is to run Linux application or kernel test on public and private cloud platform, such as VMWare ESXi, OpenStck, AWS EC2, Google Cloud Platform, Azure, etc.
 
 kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public and private cloud platform.
 
 ## deploy instance/VM on cloud
-
-### deploy AWS EC2 instance
-
-    ansible-playbook -v -i inventory -e cloud_platform=aws deploy.yaml
 
 ### deploy VMWare ESXi VM
 
@@ -18,11 +14,15 @@ kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public
 
     ansible-playbook -v -i inventory -e cloud_platform=openstack deploy.yaml
 
+### deploy AWS EC2 instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=aws deploy.yaml
+
+### deploy Google Cloud Platform instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=gcp deploy.yaml
+
 ## remove instance/VM on cloud
-
-### remove AWS EC2 instance
-
-    ansible-playbook -v -i inventory -e cloud_platform=aws remove.yaml
 
 ### remove VMWare ESXi VM
 
@@ -31,6 +31,14 @@ kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public
 ### remove OpenStack instance
 
     ansible-playbook -v -i inventory -e cloud_platform=openstack remove.yaml
+
+### remove AWS EC2 instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=aws remove.yaml
+
+### remove Google Cloud Platform instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=gcp remove.yaml
 
 ## kite-deploy configuration
 
@@ -85,3 +93,16 @@ You can set these environment variables to configure to run kite-deploy
                                             Local NVMe-based SSDs
                               "t4g.medium": AWS Graviton2 Processor with 64-bit Arm Neoverse cores
 
+    GCP_PROJECT                 Google Cloud Platform project name
+
+    GCP_SERVICE_ACCOUNT_NAME    Google Cloud Platform service account name
+
+    GCP_SERVICE_ACCOUNT_FILE    Google Cloud Platform service account file path
+
+    GCP_INSTANCE_TPYE           Google Cloud Platform instance type. Suggested instance types:
+                                x86_64:
+                                    "e2-standard-2": 2CPU/8G/Intel Skylake, Broadwell, Haswell, and AMD EPYC Rome
+                                    "n2-standard-2": 2CPU/8G/Intel Cascade Lake
+                                    "n2d-standard-2": 2CPU/8G/AMD EPYC Rome/nvme/AMD Secure Encrypted Virtualization
+                                    "c2-standard-4": 4CPU/16G/Intel Scalable Processors (Cascade Lake)
+                                    "n1-standard-2": 2CPU/7.5G/Intel Skylake, Broadwell, Haswell, Sandy Bridge, and Ivy Bridge
