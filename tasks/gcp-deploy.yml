@@ -34,7 +34,7 @@
 # Both SEV and GVNIC are not supported by rhel-8-0 and rhel-8-1
 - set_fact:
     instance_create_args: ""
-  when: os == "rhel-8-0" or os == "rhel-8-1"
+  when: os == "rhel-8-0" or os == "rhel-8-1" or os == "rhel-8-2"
 
 - set_fact:
     image_name: "kite-image-{{ os }}-{{ arch | replace('_', '-') }}"
