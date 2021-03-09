@@ -207,7 +207,7 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: instance_id
+    option: instance
     value: "{{ instance_json.Instances[0].InstanceId }}"
     no_extra_spaces: yes
 

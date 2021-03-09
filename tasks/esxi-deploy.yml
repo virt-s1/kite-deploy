@@ -141,6 +141,6 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: uuid
+    option: instance
     value: "{{ hw_uuid }}"
     no_extra_spaces: yes

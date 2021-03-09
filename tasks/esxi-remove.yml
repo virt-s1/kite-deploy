@@ -5,7 +5,7 @@
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
     validate_certs: no
-    uuid: "{{ uuid }}"
+    uuid: "{{ instance }}"
     state: powered-off
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
     validate_certs: no
-    uuid: "{{ uuid }}"
+    uuid: "{{ instance }}"
     state: absent
   ignore_errors: yes
 
@@ -31,6 +31,6 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: uuid
+    option: instance
     state: absent
   ignore_errors: yes

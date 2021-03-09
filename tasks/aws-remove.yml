@@ -3,7 +3,7 @@
   ec2:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
-    instance_ids: "{{ instance_id }}"
+    instance_ids: "{{ instance }}"
     state: absent
     wait: yes
   ignore_errors: yes
@@ -13,7 +13,7 @@
 - name: wait until instance terminated
   ec2_instance_info:
     instance_ids:
-      - "{{ instance_id }}"
+      - "{{ instance }}"
   register: result_instance_status
   retries: 30
   delay: 10
@@ -40,7 +40,7 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: instance_id
+    option: instance
     state: absent
   ignore_errors: yes
 

@@ -2,7 +2,7 @@
 - name: remove openstack instance
   os_server:
     cloud: psi-openstack
-    name: "{{ instance_name }}"
+    name: "{{ instance }}"
     state: absent
   ignore_errors: yes
 
@@ -18,6 +18,6 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: instance_name
+    option: instance
     state: absent
   ignore_errors: yes

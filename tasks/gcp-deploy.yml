@@ -58,7 +58,7 @@
         delay: 10
   always:
     - name: check and save the progress of an instance using
-      shell: /usr/bin/gcloud compute instances get-serial-port-output {{ instance_name }} --zone=us-central1-a --project={{ gcp_project }} > {{ instance_name }}.serial.log
+      shell: gcloud compute instances get-serial-port-output {{ instance_name }} --zone=us-central1-a --project={{ gcp_project }} > {{ instance_name }}.serial.log
 
 - name: add instance to guest group
   add_host:
@@ -90,6 +90,6 @@
   ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
-    option: instance_name
+    option: instance
     value: "{{ instance_name }}"
     no_extra_spaces: yes
