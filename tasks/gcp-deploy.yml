@@ -39,22 +39,26 @@
 - set_fact:
     image_name: "kite-image-{{ os }}-{{ arch | replace('_', '-') }}"
 
-- name: create features enabled instance
-  command: /usr/bin/gcloud compute instances create {{ instance_name }} --zone=us-central1-a --machine-type=n2d-standard-2 --boot-disk-auto-delete --boot-disk-size=20GB --boot-disk-type=pd-ssd --labels=kite=kite-guest-{{ os }}-{{ arch }}-{{ tmp_num }} --metadata-from-file=ssh-keys=key/gcp-ssh-key --metadata=block-project-ssh-keys=TRUE --preemptible --image={{ image_name }} --service-account={{ gcp_service_account_name }} {{ instance_create_args }} --project={{ gcp_project }} --format=json
-  register: result_instance
+- block:
+    - name: create features enabled instance
+      command: /usr/bin/gcloud compute instances create {{ instance_name }} --zone=us-central1-a --machine-type=n2d-standard-2 --boot-disk-auto-delete --boot-disk-size=20GB --boot-disk-type=pd-ssd --labels=kite=kite-guest-{{ os }}-{{ arch }}-{{ tmp_num }} --metadata-from-file=ssh-keys=key/gcp-ssh-key --metadata=block-project-ssh-keys=TRUE --preemptible --image={{ image_name }} --service-account={{ gcp_service_account_name }} {{ instance_create_args }} --project={{ gcp_project }} --format=json
+      register: result_instance
 
-- debug:
-    var: result_instance
+    - debug:
+        var: result_instance
 
-- set_fact:
-    instance_ip: "{{ result_instance.stdout | from_json | json_query('[0].networkInterfaces[0].accessConfigs[0].natIP') }}"
+    - set_fact:
+        instance_ip: "{{ result_instance.stdout | from_json | json_query('[0].networkInterfaces[0].accessConfigs[0].natIP') }}"
 
-- name: waits until ssh is reachable
-  wait_for:
-    host: "{{ instance_ip }}"
-    port: 22
-    search_regex: OpenSSH
-    delay: 10
+    - name: waits until ssh is reachable
+      wait_for:
+        host: "{{ instance_ip }}"
+        port: 22
+        search_regex: OpenSSH
+        delay: 10
+  always:
+    - name: check and save the progress of an instance using
+      shell: /usr/bin/gcloud compute instances get-serial-port-output {{ instance_name }} --zone=us-central1-a --project={{ gcp_project }} > {{ instance_name }}.serial.log
 
 - name: add instance to guest group
   add_host:
