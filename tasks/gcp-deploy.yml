@@ -59,6 +59,7 @@
   always:
     - name: check and save the progress of an instance using
       shell: gcloud compute instances get-serial-port-output {{ instance_name }} --zone=us-central1-a --project={{ gcp_project }} > {{ instance_name }}.serial.log
+      ignore_errors: yes
 
 - name: add instance to guest group
   add_host:
