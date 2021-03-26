@@ -41,7 +41,7 @@
 
 - block:
     - name: create features enabled instance
-      command: /usr/bin/gcloud compute instances create {{ instance_name }} --zone=us-central1-a --machine-type=n2d-standard-2 --boot-disk-auto-delete --boot-disk-size=20GB --boot-disk-type=pd-ssd --labels=kite=kite-guest-{{ os }}-{{ arch }}-{{ tmp_num }} --metadata-from-file=ssh-keys=key/gcp-ssh-key --metadata=block-project-ssh-keys=TRUE --preemptible --image={{ image_name }} --service-account={{ gcp_service_account_name }} {{ instance_create_args }} --project={{ gcp_project }} --format=json
+      command: /usr/bin/gcloud compute instances create {{ instance_name }} --zone=us-central1-a --machine-type={{ random_instance_type }} --boot-disk-auto-delete --boot-disk-size=20GB --boot-disk-type=pd-ssd --labels=kite=kite-guest-{{ os }}-{{ arch }}-{{ tmp_num }} --metadata-from-file=ssh-keys=key/gcp-ssh-key --metadata=block-project-ssh-keys=TRUE --preemptible --image={{ image_name }} --service-account={{ gcp_service_account_name }} {{ instance_create_args }} --project={{ gcp_project }} --format=json
       register: result_instance
 
     - debug:
