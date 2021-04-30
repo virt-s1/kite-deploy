@@ -3,6 +3,6 @@ images:
   rhel-8-4: RHEL-8.4.0-x86_64-nightly-latest
   fedora-32: Fedora-Cloud-Base-32
   fedora-33: Fedora-Cloud-Base-33
-flavor: ci.nested.virt.m1.large
-network: provider_net_cci_6
+flavor: ci.m1.large
+network: provider_net_cci_9
 
