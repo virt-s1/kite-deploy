@@ -6,7 +6,7 @@ esxi_host: "{{ lookup('env', 'ESXI_HOST') }}"
 esxi_datacenter: "{{ lookup('env', 'ESXI_DATACENTER') }}"
 esxi_datastore: "{{ lookup('env', 'ESXI_DATASTORE') }}"
 # or efi
-esxi_firmware: "{{ lookup('env', 'ESXI_FIRMWARE') | default('bios', true) }}"
+esxi_firmware: "{{ lookup('env', 'INSTANCE_TYPE') | default('bios', true) }}"
 # centos8_64Guest fedora64Guest rhel8_64Guest
 esxi_guest_id: "{{ 'rhel8_64Guest' if 'rhel-8' in os else 'fedora64Guest' }}"
 esxi_cpu: 4

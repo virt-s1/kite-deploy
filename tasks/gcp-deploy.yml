@@ -12,7 +12,7 @@
 
 - name: set random instance type
   set_fact:
-    random_instance_type: "{{ lookup('env', 'GCP_INSTANCE_TYPE') | default(instance_type[instance_type_index], true) }}"
+    random_instance_type: "{{ lookup('env', 'INSTANCE_TYPE') | default(instance_type[instance_type_index], true) }}"
 
 - name: save random instance type to a file for umb
   copy:
