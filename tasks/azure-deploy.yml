@@ -1,0 +1,174 @@
+---
+- name: sing in with azure service principle
+  command: /usr/bin/az login --service-principal -u {{ azure_client_id }} -p {{ azure_secret }} --tenant {{ azure_tenant }}
+
+- name: random number for unique instance name
+  set_fact:
+    tmp_num: "{{ 999 | random(start=101) }}"
+
+- name: random number for instance type
+  set_fact:
+    instance_type_index: "{{ 3 | random(start=0) }}"
+
+- name: set random instance type
+  set_fact:
+    random_instance_type: "{{ lookup('env', 'INSTANCE_TYPE') | default(instance_type[instance_type_index], true) }}"
+
+- set_fact:
+    instance_name: "kite-guest-{{ os }}-{{ arch | replace('_', '-') }}-{{ tmp_num }}"
+
+- set_fact:
+    resource_group_name: "kite_deploy_{{ tmp_num }}_rg"
+
+- name: create resource group
+  azure_rm_resourcegroup:
+    name: "{{ resource_group_name }}"
+    auth_source: env
+    location: eastus
+    tags:
+      kite: "kite.deploy"
+
+- name: create storage account
+  azure_rm_storageaccount:
+    name: "kitedeploy{{ tmp_num }}"
+    resource_group: "{{ resource_group_name }}"
+    auth_source: env
+    access_tier: Hot
+    account_type: Standard_LRS
+    kind: StorageV2
+    location: eastus
+    tags:
+      kite: "kite.deploy"
+
+- name: create virtual network
+  azure_rm_virtualnetwork:
+    name: kite_deploy_virt_net
+    resource_group: "{{ resource_group_name }}"
+    address_prefixes: "172.30.0.0/16"
+
+- name: add subnet
+  azure_rm_subnet:
+    name: kite_deploy_subnet
+    resource_group: "{{ resource_group_name }}"
+    address_prefix: "172.30.31.0/24"
+    virtual_network: kite_deploy_virt_net
+
+- name: create public ip
+  azure_rm_publicipaddress:
+    name: kite_deploy_pub_ip
+    resource_group: "{{ resource_group_name }}"
+    allocation_method: Static
+    sku: Standard
+
+- name: create security group that allows SSH
+  azure_rm_securitygroup:
+    name: kite_deploy_sec_group
+    resource_group: "{{ resource_group_name }}"
+    rules:
+      - name: SSH
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 101
+        direction: Inbound
+
+- name: create NIC
+  azure_rm_networkinterface:
+    name: kite_deploy_nic
+    resource_group: "{{ resource_group_name }}"
+    virtual_network: kite_deploy_virt_net
+    subnet: kite_deploy_subnet
+    security_group: kite_deploy_sec_group
+    ip_configurations:
+      - name: kite_deploy_ipconfig
+        public_ip_address_name: kite_deploy_pub_ip
+        primary: yes
+
+- name: get image id
+  azure_rm_image_info:
+    name: "{{ os }}-{{ arch }}"
+    resource_group: kite_image
+  register: result_image
+
+- set_fact:
+    instance_create_args: "--priority Spot --max-price 1 --eviction-policy Delete"
+
+# Standard_B2s does not support Spot instance
+- set_fact:
+    instance_create_args: ""
+  when: random_instance_type == "Standard_B2s"
+
+- block:
+    - name: create azure vm
+      command: /usr/bin/az vm create --resource-group {{ resource_group_name }} --name {{ instance_name }} --image "{{ result_image.images[0].id }}" --size {{ random_instance_type }} {{ instance_create_args }} --nics kite_deploy_nic --os-disk-name disk-kite --boot-diagnostics-storage "kitedeploy{{ tmp_num }}" --custom-data "{{ playbook_dir }}/files/azure-cloud-init.yaml"
+      register: result_instance
+
+    - set_fact:
+        instance_ip: "{{ result_instance.stdout | from_json | json_query('publicIpAddress') }}"
+
+    - name: waits until ssh is reachable
+      wait_for:
+        host: "{{ instance_ip }}"
+        port: 22
+        search_regex: OpenSSH
+        delay: 10
+  always:
+    - name: get boot diagnostic logs uri
+      command: /usr/bin/az vm boot-diagnostics get-boot-log-uris --resource-group {{ resource_group_name }} --name {{ instance_name }}
+      register: result_diag_log_uri
+
+    - set_fact:
+        screenshot_uri: "{{ result_diag_log_uri.stdout | from_json | json_query('consoleScreenshotBlobUri') }}"
+        seriallog_uri: "{{ result_diag_log_uri.stdout | from_json | json_query('serialConsoleLogBlobUri') }}"
+
+    - name: download screenshot bmp file
+      get_url:
+        url: "{{ screenshot_uri }}"
+        dest: "{{ playbook_dir }}/{{ random_instance_type }}-screenshot.bmp"
+
+    - name: download serial console log
+      get_url:
+        url: "{{ seriallog_uri }}"
+        dest: "{{ playbook_dir }}/{{ random_instance_type }}-serial-console.log"
+
+- name: add instance to guest group
+  add_host:
+    name: "{{ instance_ip }}"
+    group: guest
+
+- name: keep private key permission to 600
+  file:
+    path: "{{ playbook_dir }}/key/identity"
+    mode: "0600"
+
+- name: ensure cloud-init has finished
+  raw: test -f /var/lib/cloud/instance/boot-finished
+  retries: 60
+  register: cloud_init_check
+  changed_when: false
+  until: cloud_init_check is success
+  delegate_to: "{{ instance_ip }}"
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    value: "{{ instance_ip }}"
+    no_extra_spaces: yes
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: resource_group_name
+    value: "{{ resource_group_name }}"
+    no_extra_spaces: yes
+
+- name: write guest info to inventory file
+  ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance
+    value: "{{ instance_name }}"
+    no_extra_spaces: yes

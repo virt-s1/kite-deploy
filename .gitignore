@@ -1,2 +1,4 @@
-aws_instance_type
+*_instance_type
 ec2_run_instance.sh
+*screenshot.bmp
+*serial-console.log

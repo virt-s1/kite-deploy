@@ -22,6 +22,10 @@ kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public
 
     ansible-playbook -v -i inventory -e cloud_platform=gcp deploy.yaml
 
+### deploy Azure Platform instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=azure deploy.yaml
+
 ## remove instance/VM on cloud
 
 ### remove VMWare ESXi VM
@@ -40,16 +44,20 @@ kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public
 
     ansible-playbook -v -i inventory -e cloud_platform=gcp remove.yaml
 
+### remove Azure Platform instance
+
+    ansible-playbook -v -i inventory -e cloud_platform=azure remove.yaml
+
 ## kite-deploy configuration
 
 You can set these environment variables to configure to run kite-deploy
 
     TEST_OS           The OS to run the tests in. Currently supported values:
-                          "rhel-8-0"
                           "rhel-8-1"
                           "rhel-8-2"
                           "rhel-8-3"
                           "rhel-8-4"
+                          "rhel-8-5"
 
     ARCH              Image architecture
                           "x86_64"
@@ -69,7 +77,7 @@ You can set these environment variables to configure to run kite-deploy
 
     ESXI_DATASTORE    Datastore name
 
-    ESXI_FIRMWARE     ESXi firmware, bios or efi
+    INSTANCE_TYPE     ESXi firmware, bios or efi
 
     VAULT_PASSWORD    Password to decrypt openstack configuration file
 
@@ -79,7 +87,7 @@ You can set these environment variables to configure to run kite-deploy
 
     AWS_REGION        AWS region
 
-    AWS_INSTANCE_TPYE     AWS instance type. Suggested instance types:
+    INSTANCE_TPYE     AWS instance type. Suggested instance types:
                           x86_64:
                               "t2.medium": Xen based instance with xen_netfront NIC
                               "t3.medium": KVM based instance with Elastic Network Adapter (ena)
@@ -99,10 +107,20 @@ You can set these environment variables to configure to run kite-deploy
 
     GCP_SERVICE_ACCOUNT_FILE    Google Cloud Platform service account file path
 
-    GCP_INSTANCE_TPYE           Google Cloud Platform instance type. Suggested instance types:
+    INSTANCE_TPYE               Google Cloud Platform instance type. Suggested instance types:
                                 x86_64:
                                     "e2-standard-2": 2CPU/8G/Intel Skylake, Broadwell, Haswell, and AMD EPYC Rome
                                     "n2-standard-2": 2CPU/8G/Intel Cascade Lake
                                     "n2d-standard-2": 2CPU/8G/AMD EPYC Rome/nvme/AMD Secure Encrypted Virtualization
                                     "c2-standard-4": 4CPU/16G/Intel Scalable Processors (Cascade Lake)
                                     "n1-standard-2": 2CPU/7.5G/Intel Skylake, Broadwell, Haswell, Sandy Bridge, and Ivy Bridge
+    AZURE_CLIENT_ID             Azure client ID
+    AZURE_SECRET                Azure secret
+    AZURE_SUBSCRIPTION_ID       Azure subscription ID
+    AZURE_TENANT                Azure Tenant
+    INSTANCE_TPYE               Azure Platform instance type. Suggested instance types:
+                                x86_64:
+                                    "Standard_B2s": 2CPU/4G/Azure Compute Unit (ACU)
+                                    "Standard_D4s_v3": 4CPU/16G/Intel Xeon Cascade Lake, Skylake, Broadwell, Haswell
+                                    "Standard_D4as_v4": 4CPU/16G/AMD EPYC 7452 processor
+                                    "Standard_F4s_v2": 4CPU/8G/Intel Xeon Cascade Lake, Skylake/Intel AVX-512

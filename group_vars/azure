@@ -1,0 +1,10 @@
+azure_client_id: "{{ lookup('env', 'AZURE_CLIENT_ID') }}"
+azure_secret: "{{ lookup('env', 'AZURE_SECRET') }}"
+azure_tenant: "{{ lookup('env', 'AZURE_TENANT') }}"
+
+# instance type covered by test
+instance_type:
+  "0": Standard_B2s
+  "1": Standard_D4s_v3
+  "2": Standard_D2as_v4
+  "3": Standard_F4s_v2
