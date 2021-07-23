@@ -100,7 +100,7 @@
 
 - block:
     - name: create azure vm
-      command: /usr/bin/az vm create --resource-group {{ resource_group_name }} --name {{ instance_name }} --image "{{ result_image.images[0].id }}" --size {{ random_instance_type }} {{ instance_create_args }} --nics kite_deploy_nic --os-disk-name disk-kite --boot-diagnostics-storage "kitedeploy{{ tmp_num }}" --custom-data "{{ playbook_dir }}/files/azure-cloud-init.yaml"
+      command: /usr/bin/az vm create --resource-group {{ resource_group_name }} --name {{ instance_name }} --image "{{ result_image.images[0].id }}" --size {{ random_instance_type }} {{ instance_create_args }} --nics kite_deploy_nic --os-disk-name disk-kite --boot-diagnostics-storage "kitedeploy{{ tmp_num }}" --custom-data "{{ playbook_dir }}/files/azure-cloud-init.yaml" --admin-username azure --ssh-dest-key-path "/home/azure/.ssh/authorized_keys" --ssh-key-values "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMiTGemx2gjWkPCApWZHblN34WaD3cIiuv6zU1S4dtSumR3NeCdUnA9fBgDGyKErIbxtI1XICoLCulv7zPQuUNa/H/iv1yyH2o+5ZuQe8sLtX5bO0nfVdBWSWQu0EMgyaHrPnt642Cby91YLjX8AVkfRPczHkE3mRTJpkYmdeYRPZqNe6+o9A4LVa5/ZNEgzQLs2fXAJlQWP24nueRm8ypdHt0HvZa4wsHELaG7AXlcz3pmg+4I256UG2f5Y99k10CqAYteRtILrR3oXary9pDd4tg9/aCS3T7GYZGi8l5CdZ2LZwHf6pLZM/O9Lf4rjDysyfPw7RZ2uwF0SRpDfUrqrufgEHCLtfADfYg0qf/iulGoLaM3OTI+Jbyra2JXP1tlzyOUUDm1dwABRTcQvujSYrdnJM4M4BHo3ca1U8Fkh/KgjVahfIYH0kx+FjT964lJAJfxU0O3nnsytiEghLk1DuHta6VNuTRehF5gbhNC2Cc6yqbSZ+lp68bU4dRDm0= kite-test"
       register: result_instance
 
     - set_fact:
@@ -113,6 +113,14 @@
         search_regex: OpenSSH
         delay: 10
   always:
+    - name: write guest info to inventory file
+      ini_file:
+        path: "{{ playbook_dir }}/inventory"
+        section: cloud:vars
+        option: resource_group_name
+        value: "{{ resource_group_name }}"
+        no_extra_spaces: yes
+
     - name: get boot diagnostic logs uri
       command: /usr/bin/az vm boot-diagnostics get-boot-log-uris --resource-group {{ resource_group_name }} --name {{ instance_name }}
       register: result_diag_log_uri
@@ -155,14 +163,6 @@
     section: cloud:vars
     option: guest_ip
     value: "{{ instance_ip }}"
-    no_extra_spaces: yes
-
-- name: write guest info to inventory file
-  ini_file:
-    path: "{{ playbook_dir }}/inventory"
-    section: cloud:vars
-    option: resource_group_name
-    value: "{{ resource_group_name }}"
     no_extra_spaces: yes
 
 - name: write guest info to inventory file

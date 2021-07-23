@@ -56,6 +56,9 @@
         port: 22
         search_regex: OpenSSH
         delay: 10
+      retries: 10
+      register: ssh_check
+      until: ssh_check is success
   always:
     - name: check and save the progress of an instance using
       shell: gcloud compute instances get-serial-port-output {{ instance_name }} --zone=us-central1-a --project={{ gcp_project }} > {{ instance_name }}.serial.log
