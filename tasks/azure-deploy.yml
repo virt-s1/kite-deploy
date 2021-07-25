@@ -121,24 +121,6 @@
         value: "{{ resource_group_name }}"
         no_extra_spaces: yes
 
-    - name: get boot diagnostic logs uri
-      command: /usr/bin/az vm boot-diagnostics get-boot-log-uris --resource-group {{ resource_group_name }} --name {{ instance_name }}
-      register: result_diag_log_uri
-
-    - set_fact:
-        screenshot_uri: "{{ result_diag_log_uri.stdout | from_json | json_query('consoleScreenshotBlobUri') }}"
-        seriallog_uri: "{{ result_diag_log_uri.stdout | from_json | json_query('serialConsoleLogBlobUri') }}"
-
-    - name: download screenshot bmp file
-      get_url:
-        url: "{{ screenshot_uri }}"
-        dest: "{{ playbook_dir }}/{{ random_instance_type }}-screenshot.bmp"
-
-    - name: download serial console log
-      get_url:
-        url: "{{ seriallog_uri }}"
-        dest: "{{ playbook_dir }}/{{ random_instance_type }}-serial-console.log"
-
 - name: add instance to guest group
   add_host:
     name: "{{ instance_ip }}"
