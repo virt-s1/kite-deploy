@@ -83,6 +83,21 @@
       - name: kite_deploy_ipconfig
         public_ip_address_name: kite_deploy_pub_ip
         primary: yes
+  when: random_instance_type == "Standard_B2s"
+
+- name: create accelerated network NIC
+  azure_rm_networkinterface:
+    name: kite_deploy_nic
+    resource_group: "{{ resource_group_name }}"
+    virtual_network: kite_deploy_virt_net
+    subnet: kite_deploy_subnet
+    security_group: kite_deploy_sec_group
+    enable_accelerated_networking: yes
+    ip_configurations:
+      - name: kite_deploy_ipconfig
+        public_ip_address_name: kite_deploy_pub_ip
+        primary: yes
+  when: random_instance_type != "Standard_B2s"
 
 - name: get image id
   azure_rm_image_info:

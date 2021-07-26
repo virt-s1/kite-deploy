@@ -6,5 +6,5 @@ azure_tenant: "{{ lookup('env', 'AZURE_TENANT') }}"
 instance_type:
   "0": Standard_B2s
   "1": Standard_D4s_v3
-  "2": Standard_D2as_v4
+  "2": Standard_D4as_v4
   "3": Standard_F4s_v2
