@@ -121,6 +121,7 @@ You can set these environment variables to configure to run kite-deploy
     INSTANCE_TPYE               Azure Platform instance type. Suggested instance types:
                                 x86_64:
                                     "Standard_B2s": 2CPU/4G/Azure Compute Unit (ACU)
-                                    "Standard_D4s_v3": 4CPU/16G/Intel Xeon Cascade Lake, Skylake, Broadwell, Haswell
                                     "Standard_D4as_v4": 4CPU/16G/AMD EPYC 7452 processor
                                     "Standard_F4s_v2": 4CPU/8G/Intel Xeon Cascade Lake, Skylake/Intel AVX-512
+                                    "Standard_L8s_v2": 8CPU/64G/AMD EPYC 7551/one 1.92TB NVMe SSD M.2
+                                    "Standard_NC6": 6CPU/56G/Intel Xeon E5-2690 v3 (Haswell)/NVIDIA Tesla K80

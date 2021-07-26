@@ -83,7 +83,7 @@
       - name: kite_deploy_ipconfig
         public_ip_address_name: kite_deploy_pub_ip
         primary: yes
-  when: random_instance_type == "Standard_B2s"
+  when: random_instance_type == "Standard_B2s" or random_instance_type == "Standard_NC6"
 
 - name: create accelerated network NIC
   azure_rm_networkinterface:
@@ -97,7 +97,9 @@
       - name: kite_deploy_ipconfig
         public_ip_address_name: kite_deploy_pub_ip
         primary: yes
-  when: random_instance_type != "Standard_B2s"
+  when:
+    - random_instance_type != "Standard_B2s"
+    - random_instance_type != "Standard_NC6"
 
 - name: get image id
   azure_rm_image_info:
