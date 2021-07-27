@@ -117,7 +117,7 @@
 
 - block:
     - name: create azure vm
-      command: /usr/bin/az vm create --resource-group {{ resource_group_name }} --name {{ instance_name }} --image "{{ result_image.images[0].id }}" --size {{ random_instance_type }} {{ instance_create_args }} --nics kite_deploy_nic --os-disk-name disk-kite --boot-diagnostics-storage "kitedeploy{{ tmp_num }}" --custom-data "{{ playbook_dir }}/files/azure-cloud-init.yaml" --admin-username azure --ssh-dest-key-path "/home/azure/.ssh/authorized_keys" --ssh-key-values "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMiTGemx2gjWkPCApWZHblN34WaD3cIiuv6zU1S4dtSumR3NeCdUnA9fBgDGyKErIbxtI1XICoLCulv7zPQuUNa/H/iv1yyH2o+5ZuQe8sLtX5bO0nfVdBWSWQu0EMgyaHrPnt642Cby91YLjX8AVkfRPczHkE3mRTJpkYmdeYRPZqNe6+o9A4LVa5/ZNEgzQLs2fXAJlQWP24nueRm8ypdHt0HvZa4wsHELaG7AXlcz3pmg+4I256UG2f5Y99k10CqAYteRtILrR3oXary9pDd4tg9/aCS3T7GYZGi8l5CdZ2LZwHf6pLZM/O9Lf4rjDysyfPw7RZ2uwF0SRpDfUrqrufgEHCLtfADfYg0qf/iulGoLaM3OTI+Jbyra2JXP1tlzyOUUDm1dwABRTcQvujSYrdnJM4M4BHo3ca1U8Fkh/KgjVahfIYH0kx+FjT964lJAJfxU0O3nnsytiEghLk1DuHta6VNuTRehF5gbhNC2Cc6yqbSZ+lp68bU4dRDm0= kite-test"
+      command: /usr/bin/az vm create --resource-group {{ resource_group_name }} --name {{ instance_name }} --image "{{ result_image.images[0].id }}" --size {{ random_instance_type }} {{ instance_create_args }} --nics kite_deploy_nic --os-disk-name disk-kite --os-disk-size-gb 20 --boot-diagnostics-storage "kitedeploy{{ tmp_num }}" --custom-data "{{ playbook_dir }}/files/azure-cloud-init.yaml" --admin-username azure --ssh-dest-key-path "/home/azure/.ssh/authorized_keys" --ssh-key-values "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMiTGemx2gjWkPCApWZHblN34WaD3cIiuv6zU1S4dtSumR3NeCdUnA9fBgDGyKErIbxtI1XICoLCulv7zPQuUNa/H/iv1yyH2o+5ZuQe8sLtX5bO0nfVdBWSWQu0EMgyaHrPnt642Cby91YLjX8AVkfRPczHkE3mRTJpkYmdeYRPZqNe6+o9A4LVa5/ZNEgzQLs2fXAJlQWP24nueRm8ypdHt0HvZa4wsHELaG7AXlcz3pmg+4I256UG2f5Y99k10CqAYteRtILrR3oXary9pDd4tg9/aCS3T7GYZGi8l5CdZ2LZwHf6pLZM/O9Lf4rjDysyfPw7RZ2uwF0SRpDfUrqrufgEHCLtfADfYg0qf/iulGoLaM3OTI+Jbyra2JXP1tlzyOUUDm1dwABRTcQvujSYrdnJM4M4BHo3ca1U8Fkh/KgjVahfIYH0kx+FjT964lJAJfxU0O3nnsytiEghLk1DuHta6VNuTRehF5gbhNC2Cc6yqbSZ+lp68bU4dRDm0= kite-test"
       register: result_instance
 
     - set_fact:
@@ -129,6 +129,37 @@
         port: 22
         search_regex: OpenSSH
         delay: 10
+
+    - name: add instance to guest group
+      add_host:
+        name: "{{ instance_ip }}"
+        group: guest
+
+    - name: keep private key permission to 600
+      file:
+        path: "{{ playbook_dir }}/key/identity"
+        mode: "0600"
+
+    - name: ensure cloud-init has finished
+      raw: test -f /var/lib/cloud/instance/boot-finished
+      retries: 60
+      register: cloud_init_check
+      changed_when: false
+      until: cloud_init_check is success
+      delegate_to: "{{ instance_ip }}"
+
+    # 10G image will be resized to 20G (disk size)
+    - name: disk growpart feature checking
+      command: df -h
+      become: yes
+      register: result_growpart
+      delegate_to: "{{ instance_ip }}"
+
+    - name: disk growpart not support building gcp image fail
+      fail:
+        msg: "can't find disk growpart support, gcp image {{ os }} {{ arch }} fail"
+      when: "'20G' not in result_growpart.stdout"
+
   always:
     - name: write guest info to inventory file
       ini_file:
@@ -137,24 +168,6 @@
         option: resource_group_name
         value: "{{ resource_group_name }}"
         no_extra_spaces: yes
-
-- name: add instance to guest group
-  add_host:
-    name: "{{ instance_ip }}"
-    group: guest
-
-- name: keep private key permission to 600
-  file:
-    path: "{{ playbook_dir }}/key/identity"
-    mode: "0600"
-
-- name: ensure cloud-init has finished
-  raw: test -f /var/lib/cloud/instance/boot-finished
-  retries: 60
-  register: cloud_init_check
-  changed_when: false
-  until: cloud_init_check is success
-  delegate_to: "{{ instance_ip }}"
 
 - name: write guest info to inventory file
   ini_file:
