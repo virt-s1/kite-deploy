@@ -4,6 +4,3 @@ arch: "{{ lookup('env', 'ARCH') | default('x86_64', true) }}"
 
 # RHEL release
 os: "{{ lookup('env', 'TEST_OS') }}"
-
-# Project
-project: kite

@@ -1,6 +1,6 @@
 ---
 - name: shut down guest
-  vmware_guest_powerstate:
+  community.vmware.vmware_guest_powerstate:
     hostname: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
@@ -10,7 +10,7 @@
   ignore_errors: yes
 
 - name: remove guest from disk
-  vmware_guest:
+  community.vmware.vmware_guest:
     hostname: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
@@ -20,7 +20,7 @@
   ignore_errors: yes
 
 - name: remove guest_ip from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -28,7 +28,7 @@
   ignore_errors: yes
 
 - name: remove uuid from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

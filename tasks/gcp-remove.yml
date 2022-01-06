@@ -3,7 +3,7 @@
   command: /usr/bin/gcloud compute instances delete {{ instance }} --zone=us-central1-a --delete-disks=all --project={{ gcp_project }}
 
 - name: remove guest_ip from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -11,7 +11,7 @@
   ignore_errors: yes
 
 - name: remove instance_name from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

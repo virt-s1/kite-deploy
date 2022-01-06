@@ -1,13 +1,13 @@
 ---
 - name: remove openstack instance
-  os_server:
-    cloud: psi-openstack
+  openstack.cloud.server:
+    cloud: rhos-01
     name: "{{ instance }}"
     state: absent
   ignore_errors: yes
 
 - name: remove guest_ip from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: remove uuid from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

@@ -1,17 +1,17 @@
 ---
-- name: random number for unique instance tag
+- name: random number for unique instance name
   set_fact:
     tmp_num: "{{ 999 | random(start=101) }}"
 
 - name: "clone vm from template {{ esxi_template }} on {{ esxi_host }}"
-  vmware_guest:
+  community.vmware.vmware_guest:
     hostname: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
     validate_certs: no
     datacenter: "{{ esxi_datacenter }}"
     esxi_hostname: "{{ esxi_host }}"
-    name: "{{ project }}-{{ os }}-{{ esxi_firmware }}-{{ lookup('env', 'PIPELINE_ID') | default(tmp_num, true) }}"
+    name: "kite-{{ os }}-{{ esxi_firmware }}-{{ lookup('env', 'PIPELINE_ID') | default(tmp_num, true) }}"
     folder: ""
     state: poweredon
     template: "{{ esxi_template }}"
@@ -35,10 +35,6 @@
     wait_for_ip_address: yes
   register: new_guest
 
-- name: show new created guest info
-  debug:
-    var: new_guest
-
 - name: get uuid and make it a variable
   set_fact:
     hw_uuid: "{{ new_guest.instance.hw_product_uuid }}"
@@ -48,7 +44,7 @@
     # The 'vmware_guest_facts' module has been renamed to 'vmware_guest_info'
     # This feature will be removed in version 2.13
     - name: wait for ip _really_ being available
-      vmware_guest_info:
+      community.vmware.vmware_guest_info:
         hostname: "{{ vsphere_server }}"
         username: "{{ vsphere_username }}"
         password: "{{ vsphere_password }}"
@@ -61,7 +57,7 @@
       delay: 1
   rescue:
     - name: poweroff guest
-      vmware_guest:
+      community.vmware.vmware_guest:
         hostname: "{{ vsphere_server }}"
         username: "{{ vsphere_username }}"
         password: "{{ vsphere_password }}"
@@ -70,7 +66,7 @@
         state: poweredoff
         state_change_timeout: 120
     - name: start guest
-      vmware_guest:
+      community.vmware.vmware_guest:
         hostname: "{{ vsphere_server }}"
         username: "{{ vsphere_username }}"
         password: "{{ vsphere_password }}"
@@ -79,7 +75,7 @@
         state: poweredon
         state_change_timeout: 120
     - name: wait for ip _really_ being available
-      vmware_guest_info:
+      community.vmware.vmware_guest_info:
         hostname: "{{ vsphere_server }}"
         username: "{{ vsphere_username }}"
         password: "{{ vsphere_password }}"
@@ -118,7 +114,7 @@
   delegate_to: "{{ new_guest.instance.ipv4 }}"
 
 - name: create a snapshot
-  vmware_guest_snapshot:
+  community.vmware.vmware_guest_snapshot:
     hostname: "{{ vsphere_server }}"
     username: "{{ vsphere_username }}"
     password: "{{ vsphere_password }}"
@@ -127,10 +123,10 @@
     uuid: "{{ hw_uuid }}"
     state: present
     snapshot_name: "{{ esxi_snapshot_name }}"
-    description: "snapshot for {{ project }} {{ os }} {{ esxi_firmware }}"
+    description: "snapshot for {{ os }} {{ esxi_firmware }}"
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -138,7 +134,7 @@
     no_extra_spaces: yes
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

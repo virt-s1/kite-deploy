@@ -53,15 +53,16 @@ kite-deploy will provide an easy way to deploy Linux guest/instance/VM on public
 You can set these environment variables to configure to run kite-deploy
 
     TEST_OS           The OS to run the tests in. Currently supported values:
-                          "rhel-8-1"
                           "rhel-8-2"
                           "rhel-8-3"
                           "rhel-8-4"
                           "rhel-8-5"
+                          "rhel-8-6"
+                          "rhel-9-0"
 
     ARCH              Image architecture
                           "x86_64"
-                          "aarch64"
+                          "aarch64"(AWS ONLY)
 
     PIPELINE_ID       CKI pipeline ID
 
@@ -79,11 +80,9 @@ You can set these environment variables to configure to run kite-deploy
 
     INSTANCE_TYPE     ESXi firmware, bios or efi
 
-    VAULT_PASSWORD    Password to decrypt openstack configuration file
+    OS_CLIENT_CONFIG_FILE       Absolute path of clouds.yaml for OpenStack auth
 
-    AWS_ACCESS_KEY    AWS access key for AWS API authentication
-
-    AWS_SECRET_KEY    AWS secret key for AWS API authentication
+    AWS_SHARED_CREDENTIALS_FILE AWS credentials file for AWS auth
 
     AWS_REGION        AWS region
 

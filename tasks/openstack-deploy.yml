@@ -1,39 +1,26 @@
 ---
-- name: create openstack configuration folder
-  file:
-    path: ~/.config/openstack
-    state: directory
-
-- name: set vault password file
-  copy:
-    content: "{{ lookup('env', 'VAULT_PASSWORD') }}"
-    dest: "~/.config/ansible-vault"
-
-- name: random number for unique instance tag
+- name: random number for unique instance name
   set_fact:
     tmp_num: "{{ 999 | random(start=101) }}"
 
-- name: save clouds.yaml to ~/.config/openstack
-  command: ansible-vault decrypt -v --vault-password-file ~/.config/ansible-vault {{ playbook_dir }}/files/clouds-yaml --output ~/.config/openstack/clouds.yaml
-
 - name: create a new openstack keypair
-  os_keypair:
-    cloud: psi-openstack
+  openstack.cloud.keypair:
+    cloud: rhos-01
     state: present
-    name: kite-guest-key
+    name: kite-test
     public_key_file: "{{ playbook_dir }}/key/identity.pub"
 
 - name: create security group
-  os_security_group:
-    cloud: psi-openstack
-    name: kite-guest
+  openstack.cloud.security_group:
+    cloud: rhos-01
+    name: kite-test
     state: present
     description: security group for kite image build server
 
 - name: set ssh rule for security group kite
-  os_security_group_rule:
-    cloud: psi-openstack
-    security_group: kite-guest
+  openstack.cloud.security_group_rule:
+    cloud: rhos-01
+    security_group: kite-test
     protocol: tcp
     port_range_min: 22
     port_range_max: 22
@@ -44,14 +31,14 @@
     instance_name: "kite-guest-{{ os }}-{{ lookup('env', 'GITHUB_SHA')[:9] | default(tmp_num, true) }}"
 
 - name: deploy instance
-  os_server:
-    cloud: psi-openstack
+  openstack.cloud.server:
+    cloud: rhos-01
     name: "{{ instance_name }}"
-    image: kite-openstack-{{ os }}
+    image: "kite-image-{{ os }}-{{ arch }}"
     flavor: "{{ flavor }}"
     network: "{{ network }}"
-    key_name: kite-guest-key
-    security_groups: kite-guest
+    key_name: kite-test
+    security_groups: kite-test
     auto_ip: yes
     wait: yes
     timeout: 600
@@ -83,7 +70,7 @@
   delegate_to: "{{ instance_result.openstack.public_v4 }}"
 
 - name: write guest ip info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -91,7 +78,7 @@
     no_extra_spaces: yes
 
 - name: write instance name info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

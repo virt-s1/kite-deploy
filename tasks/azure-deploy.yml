@@ -21,7 +21,7 @@
     resource_group_name: "kite_deploy_{{ tmp_num }}_rg"
 
 - name: create resource group
-  azure_rm_resourcegroup:
+  azure.azcollection.azure_rm_resourcegroup:
     name: "{{ resource_group_name }}"
     auth_source: env
     location: eastus
@@ -29,7 +29,7 @@
       kite: "kite.deploy"
 
 - name: create storage account
-  azure_rm_storageaccount:
+  azure.azcollection.azure_rm_storageaccount:
     name: "kitedeploy{{ tmp_num }}"
     resource_group: "{{ resource_group_name }}"
     auth_source: env
@@ -41,27 +41,27 @@
       kite: "kite.deploy"
 
 - name: create virtual network
-  azure_rm_virtualnetwork:
+  azure.azcollection.azure_rm_virtualnetwork:
     name: kite_deploy_virt_net
     resource_group: "{{ resource_group_name }}"
     address_prefixes: "172.30.0.0/16"
 
 - name: add subnet
-  azure_rm_subnet:
+  azure.azcollection.azure_rm_subnet:
     name: kite_deploy_subnet
     resource_group: "{{ resource_group_name }}"
     address_prefix: "172.30.31.0/24"
     virtual_network: kite_deploy_virt_net
 
 - name: create public ip
-  azure_rm_publicipaddress:
+  azure.azcollection.azure_rm_publicipaddress:
     name: kite_deploy_pub_ip
     resource_group: "{{ resource_group_name }}"
     allocation_method: Static
     sku: Standard
 
 - name: create security group that allows SSH
-  azure_rm_securitygroup:
+  azure.azcollection.azure_rm_securitygroup:
     name: kite_deploy_sec_group
     resource_group: "{{ resource_group_name }}"
     rules:
@@ -73,7 +73,7 @@
         direction: Inbound
 
 - name: create NIC
-  azure_rm_networkinterface:
+  azure.azcollection.azure_rm_networkinterface:
     name: kite_deploy_nic
     resource_group: "{{ resource_group_name }}"
     virtual_network: kite_deploy_virt_net
@@ -86,7 +86,7 @@
   when: random_instance_type == "Standard_B2s" or random_instance_type == "Standard_NC6"
 
 - name: create accelerated network NIC
-  azure_rm_networkinterface:
+  azure.azcollection.azure_rm_networkinterface:
     name: kite_deploy_nic
     resource_group: "{{ resource_group_name }}"
     virtual_network: kite_deploy_virt_net
@@ -102,8 +102,8 @@
     - random_instance_type != "Standard_NC6"
 
 - name: get image id
-  azure_rm_image_info:
-    name: "{{ os }}-{{ arch }}"
+  azure.azcollection.azure_rm_image_info:
+    name: "kite-image-{{ os }}-{{ arch }}"
     resource_group: kite_image
   register: result_image
 
@@ -162,7 +162,7 @@
 
   always:
     - name: write guest info to inventory file
-      ini_file:
+      community.general.ini_file:
         path: "{{ playbook_dir }}/inventory"
         section: cloud:vars
         option: resource_group_name
@@ -170,7 +170,7 @@
         no_extra_spaces: yes
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -178,7 +178,7 @@
     no_extra_spaces: yes
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance

@@ -1,17 +1,5 @@
 ---
-- name: create $HOME/.aws folder to dave config and credentials
-  file:
-    path: ~/.aws
-    state: directory
-    mode: '0755'
-
-- name: create credentials file
-  template:
-    src: aws_credentials.j2
-    dest: ~/.aws/credentials
-    mode: '0600'
-
-- name: random number for unique instance tag
+- name: random number for unique instance name
   set_fact:
     tmp_num: "{{ 999 | random(start=101) }}"
 
@@ -29,16 +17,13 @@
     dest: "aws_instance_type"
 
 - name: get all availability zones
-  aws_az_info:
+  amazon.aws.aws_az_info:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
   register: ec2_zones
 
-- debug:
-    var: ec2_zones
-
 - name: create VPC
-  ec2_vpc_net:
+  amazon.aws.ec2_vpc_net:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     name: "kite.guest"
@@ -47,11 +32,8 @@
       kite: "kite.guest"
   register: ec2_vpc
 
-- debug:
-    var: ec2_vpc
-
 - name: add internet gateway for VPC
-  ec2_vpc_igw:
+  amazon.aws.ec2_vpc_igw:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
@@ -59,11 +41,8 @@
       kite: "kite.guest"
   register: ec2_vpc_igw
 
-- debug:
-    var: ec2_vpc_igw
-
 - name: "create subnet for VPC in {{ ec2_zones.availability_zones[0] }}"
-  ec2_vpc_subnet:
+  amazon.aws.ec2_vpc_subnet:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
@@ -73,11 +52,8 @@
       kite: "kite.guest"
   register: ec2_vpc_subnet
 
-- debug:
-    var: ec2_vpc_subnet
-
 - name: add default route in route table for all vpc subnets
-  ec2_vpc_route_table:
+  amazon.aws.ec2_vpc_route_table:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
@@ -90,20 +66,8 @@
       kite: "kite.guest"
   register: ec2_vpc_route_table
 
-- debug:
-    var: ec2_vpc_route_table
-
-# # Do not use ipify.org to get public IP because it's not stable
-# - name: get localhost public ip address
-#   uri:
-#     url: https://api.ipify.org?format=json
-#   register: result_ip
-
-# - debug:
-#     var: result_ip
-
 - name: create security group
-  ec2_group:
+  amazon.aws.ec2_group:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     vpc_id: "{{ ec2_vpc.vpc.id }}"
@@ -114,18 +78,13 @@
         ports:
           - 22
         cidr_ip: 0.0.0.0/0
-      # - proto: all
-      #   cidr_ip: "{{ result_ip.json.ip }}/32"
     tags:
       kite: "kite.guest"
       name: "kite.guest"
   register: ec2_security_group
 
-- debug:
-    var: ec2_security_group
-
 - name: config ssh keypair used by test
-  ec2_key:
+  amazon.aws.ec2_key:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     name: "kite.guest.{{ os }}.{{ arch }}"
@@ -133,7 +92,7 @@
 
 - name: set ami id key
   set_fact:
-    ami_id_key: "kite_imagebuild_{{ os }}_{{ arch }}"
+    ami_id_key: "kite-image-{{ os }}-{{ arch }}"
 
 - name: set tag name
   set_fact:
@@ -196,7 +155,7 @@
   delegate_to: "{{ public_ip }}"
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -204,18 +163,11 @@
     no_extra_spaces: yes
 
 - name: write guest info to inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance
     value: "{{ instance_json.Instances[0].InstanceId }}"
     no_extra_spaces: yes
 
-# # Do not delete security group, so don't need group id any more
-# - name: write guest info to inventory file
-#   ini_file:
-#     path: "{{ playbook_dir }}/inventory"
-#     section: cloud:vars
-#     option: group_id
-#     value: "{{ instance_json.Instances[0].SecurityGroups[0].GroupId }}"
-#     no_extra_spaces: yes
+# Do not delete security group, so don't need group id any more

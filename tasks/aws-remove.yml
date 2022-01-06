@@ -1,6 +1,6 @@
 ---
 - name: terminate instance
-  ec2:
+  amazon.aws.ec2_instance:
     profile: "{{ aws_profile }}"
     region: "{{ aws_region }}"
     instance_ids: "{{ instance }}"
@@ -8,10 +8,8 @@
     wait: yes
   ignore_errors: yes
 
-# security group can be deleted only when instance state is at terminated
-# and can't be deleted if instance state is at shutting-down
 - name: wait until instance terminated
-  ec2_instance_info:
+  amazon.aws.ec2_instance_info:
     instance_ids:
       - "{{ instance }}"
   register: result_instance_status
@@ -19,17 +17,10 @@
   delay: 10
   until: result_instance_status.instances[0].state.name == "terminated"
 
-# # Security group is for common use already, don't need delete it everytime
-# - name: delete security group
-#   ec2_group:
-#     profile: "{{ aws_profile }}"
-#     region: "{{ aws_region }}"
-#     group_id: "{{ group_id }}"
-#     state: absent
-#   ignore_errors: yes
+# Security group is for common use already, don't need delete it everytime
 
 - name: remove guest_ip from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: guest_ip
@@ -37,18 +28,9 @@
   ignore_errors: yes
 
 - name: remove instance_id from inventory file
-  ini_file:
+  community.general.ini_file:
     path: "{{ playbook_dir }}/inventory"
     section: cloud:vars
     option: instance
     state: absent
   ignore_errors: yes
-
-# # No group_id added in aws-deploy.yml
-# - name: remove group_id from inventory file
-#   ini_file:
-#     path: "{{ playbook_dir }}/inventory"
-#     section: cloud:vars
-#     option: group_id
-#     state: absent
-#   ignore_errors: yes

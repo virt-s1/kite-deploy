@@ -1,8 +1,32 @@
 - name: "delete resource group {{ resource_group_name }}"
-  azure_rm_resourcegroup:
+  azure.azcollection.azure_rm_resourcegroup:
     name: "{{ resource_group_name }}"
     auth_source: env
     location: eastus
     force_delete_nonempty: yes
+    state: absent
+  ignore_errors: yes
+
+- name: remove guest_ip from inventory file
+  community.general.ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: guest_ip
+    state: absent
+  ignore_errors: yes
+
+- name: remove instance_name from inventory file
+  community.general.ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: instance
+    state: absent
+  ignore_errors: yes
+
+- name: remove resource_group_name from inventory file
+  community.general.ini_file:
+    path: "{{ playbook_dir }}/inventory"
+    section: cloud:vars
+    option: resource_group_name
     state: absent
   ignore_errors: yes

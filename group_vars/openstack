@@ -1,8 +1,2 @@
-images:
-  rhel-8-3: RHEL-8.3.1-x86_64-nightly-latest
-  rhel-8-4: RHEL-8.4.0-x86_64-nightly-latest
-  fedora-32: Fedora-Cloud-Base-32
-  fedora-33: Fedora-Cloud-Base-33
-flavor: ci.m1.large
-network: provider_net_cci_9
-
+flavor: ci.standard.large
+network: shared_net_9
