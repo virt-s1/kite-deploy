@@ -1,7 +1,7 @@
 ---
 - name: random number for unique instance name
   set_fact:
-    tmp_num: "{{ 999 | random(start=101) }}"
+    tmp_num: "{{ 9999 | random(start=1001) }}"
 
 - name: create a new openstack keypair
   openstack.cloud.keypair:
