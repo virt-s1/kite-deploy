@@ -95,23 +95,10 @@
     delay: 10
     timeout: 1800
 
-- name: add instance to guest group
-  add_host:
-    name: "{{ new_guest.instance.ipv4 }}"
-    group: guest
-
 - name: keep private key permission to 600
   file:
     path: "{{ playbook_dir }}/key/identity"
     mode: "0600"
-
-- name: ensure cloud-init has finished
-  raw: test -f /var/lib/cloud/instance/boot-finished
-  retries: 60
-  register: cloud_init_check
-  changed_when: false
-  until: cloud_init_check is success
-  delegate_to: "{{ new_guest.instance.ipv4 }}"
 
 - name: create a snapshot
   community.vmware.vmware_guest_snapshot:
