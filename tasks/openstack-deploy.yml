@@ -40,6 +40,7 @@
     key_name: kite-test
     security_groups: kite-test
     auto_ip: yes
+    config_drive: yes
     wait: yes
     timeout: 600
   register: instance_result
